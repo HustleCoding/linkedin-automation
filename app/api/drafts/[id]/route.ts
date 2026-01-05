@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+const isValidUuid = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -38,6 +41,10 @@ export async function PATCH(
   const supabase = await createClient();
   const { id } = params;
 
+  if (!isValidUuid(id)) {
+    return NextResponse.json({ error: "Invalid draft id" }, { status: 400 });
+  }
+
   const {
     data: { user },
     error: authError,
@@ -50,29 +57,34 @@ export async function PATCH(
   const body = await request.json();
 
   const updates: Record<string, unknown> = {};
-  if ("content" in body) updates.content = body.content;
-  if ("tone" in body) updates.tone = body.tone;
-  if ("image_url" in body) updates.image_url = body.image_url;
-  if ("scheduled_at" in body) updates.scheduled_at = body.scheduled_at;
-  if ("status" in body) updates.status = body.status;
-  if ("trend_tag" in body) updates.trend_tag = body.trend_tag;
-  if ("trend_title" in body) updates.trend_title = body.trend_title;
+  const setUpdate = (key: string, value: unknown) => {
+    if (value !== undefined) {
+      updates[key] = value;
+    }
+  };
+
+  if ("content" in body) setUpdate("content", body.content);
+  if ("tone" in body) setUpdate("tone", body.tone);
+  if ("image_url" in body) setUpdate("image_url", body.image_url);
+  if ("scheduled_at" in body) setUpdate("scheduled_at", body.scheduled_at);
+  if ("status" in body) setUpdate("status", body.status);
+  if ("trend_tag" in body) setUpdate("trend_tag", body.trend_tag);
+  if ("trend_title" in body) setUpdate("trend_title", body.trend_title);
   if ("ayrshare_post_id" in body)
-    updates.ayrshare_post_id = body.ayrshare_post_id;
-  if ("published_at" in body) updates.published_at = body.published_at;
-  if ("ayrshare_error" in body) updates.ayrshare_error = body.ayrshare_error;
+    setUpdate("ayrshare_post_id", body.ayrshare_post_id);
+  if ("published_at" in body) setUpdate("published_at", body.published_at);
+  if ("ayrshare_error" in body) setUpdate("ayrshare_error", body.ayrshare_error);
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const { data, error } = await supabase
-    .from("drafts")
-    .update(updates)
-    .eq("id", id)
-    .eq("user_id", user.id)
-    .select()
-    .single();
+  let query = supabase.from("drafts").update(updates).eq("id", id);
+  if (user.id && isValidUuid(user.id)) {
+    query = query.eq("user_id", user.id);
+  }
+
+  const { data, error } = await query.select().single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
