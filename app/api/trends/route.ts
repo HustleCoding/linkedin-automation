@@ -1,5 +1,8 @@
 import { generateObject } from "ai"
+import { NextResponse } from "next/server"
 import { z } from "zod"
+import { createServerClient } from "@/lib/supabase/server"
+import type { Trend } from "@/lib/types/trends"
 
 const trendsSchema = z.object({
   trends: z
@@ -18,11 +21,37 @@ const trendsSchema = z.object({
 
 export async function POST(req: Request) {
   try {
-    const { niche } = await req.json()
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const body = await req.json().catch(() => ({}))
+    const requestedNiche = typeof body?.niche === "string" && body.niche.trim() ? body.niche : "All Niches"
+    const shouldRefresh = Boolean(body?.refresh)
+
+    if (!shouldRefresh) {
+      const { data: cached, error: cacheError } = await supabase
+        .from("trend_cache")
+        .select("trends")
+        .eq("user_id", user.id)
+        .eq("niche", requestedNiche)
+        .maybeSingle()
+
+      if (cacheError && cacheError.code !== "PGRST116") {
+        console.error("Trend cache read error:", cacheError)
+      } else if (cached?.trends && Array.isArray(cached.trends) && cached.trends.length > 0) {
+        return NextResponse.json({ trends: cached.trends as Trend[] })
+      }
+    }
 
     const nicheContext =
-      niche && niche !== "All Niches"
-        ? `Focus specifically on the "${niche}" niche.`
+      requestedNiche && requestedNiche !== "All Niches"
+        ? `Focus specifically on the "${requestedNiche}" niche.`
         : "Cover a variety of professional niches including Technology, Leadership, Career, Entrepreneurship, Sales, and Marketing."
 
     const { object } = await generateObject({
@@ -49,9 +78,27 @@ Focus on trends from the last 7 days. Prioritize topics with high engagement pot
       id: `trend-${Date.now()}-${index}`,
     }))
 
-    return Response.json({ trends: trendsWithIds })
+    const { error: upsertError } = await supabase
+      .from("trend_cache")
+      .upsert(
+        {
+          user_id: user.id,
+          niche: requestedNiche,
+          trends: trendsWithIds,
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "user_id,niche",
+        },
+      )
+
+    if (upsertError) {
+      console.error("Trend cache write error:", upsertError)
+    }
+
+    return NextResponse.json({ trends: trendsWithIds })
   } catch (error) {
     console.error("Error fetching trends:", error)
-    return Response.json({ error: "Failed to fetch trending topics" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to fetch trending topics" }, { status: 500 })
   }
 }

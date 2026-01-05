@@ -24,7 +24,8 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
 
-  const { trends, isLoading, isError, refresh } = useTrends(selectedNiche)
+  const { trends, isLoading, isRefreshing, isError, refresh } = useTrends(selectedNiche)
+  const isBusy = isLoading || isRefreshing
 
   const filteredTrends = trends.filter((trend) => {
     const matchesSearch =
@@ -77,10 +78,10 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
             variant="ghost"
             size="sm"
             onClick={() => refresh()}
-            disabled={isLoading}
+            disabled={isBusy}
             className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
           >
-            <RefreshCw className={cn("h-3.5 w-3.5 mr-1", isLoading && "animate-spin")} />
+            <RefreshCw className={cn("h-3.5 w-3.5 mr-1", isBusy && "animate-spin")} />
             <span className="hidden sm:inline">Refresh</span>
           </Button>
         </div>
