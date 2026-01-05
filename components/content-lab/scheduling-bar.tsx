@@ -143,9 +143,34 @@ export function SchedulingBar({
         }
       }
 
-      // Build ISO 8601 schedule date
+      if (!draftId) {
+        throw new Error("Unable to create a draft for scheduling")
+      }
+
+      const updatedDraft = await updateDraft({
+        id: draftId,
+        content,
+        tone,
+        image_url: imageUrl,
+      })
+      if (!updatedDraft) {
+        throw new Error("Failed to update draft before scheduling")
+      }
+
+      const [hour, minute] = scheduledTime.split(":").map((value) => Number(value))
+      if (Number.isNaN(hour) || Number.isNaN(minute)) {
+        throw new Error("Invalid schedule time")
+      }
+
+      // Build a local datetime before converting to UTC ISO.
       const scheduleDateTime = new Date(
-        `${scheduledDate.toISOString().split("T")[0]}T${scheduledTime}:00`,
+        scheduledDate.getFullYear(),
+        scheduledDate.getMonth(),
+        scheduledDate.getDate(),
+        hour,
+        minute,
+        0,
+        0,
       ).toISOString()
 
       // Call Ayrshare API to schedule

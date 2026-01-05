@@ -30,6 +30,9 @@ export default function SchedulePage() {
   }, [router])
 
   const scheduledDrafts = drafts?.filter((d) => d.status === "scheduled" && d.scheduled_at) || []
+  const sortedScheduledDrafts = [...scheduledDrafts].sort(
+    (a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime(),
+  )
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()
@@ -44,7 +47,7 @@ export default function SchedulePage() {
   const { daysInMonth, startingDay } = getDaysInMonth(currentDate)
 
   const getPostsForDay = (day: number) => {
-    return scheduledDrafts.filter((draft) => {
+    return sortedScheduledDrafts.filter((draft) => {
       const draftDate = new Date(draft.scheduled_at!)
       return (
         draftDate.getDate() === day &&
@@ -55,11 +58,11 @@ export default function SchedulePage() {
   }
 
   const prevMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))
   }
 
   const nextMonth = () => {
-    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
+    setCurrentDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))
   }
 
   const goToToday = () => {
@@ -81,7 +84,8 @@ export default function SchedulePage() {
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
   const weekEnd = new Date(todayStart)
-  weekEnd.setDate(weekEnd.getDate() + 7)
+  weekEnd.setDate(weekEnd.getDate() + 6)
+  weekEnd.setHours(23, 59, 59, 999)
 
   const todayCount = scheduledDrafts.filter((d) => {
     const scheduled = new Date(d.scheduled_at!)
@@ -264,9 +268,7 @@ export default function SchedulePage() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {scheduledDrafts
-                      .sort((a, b) => new Date(a.scheduled_at!).getTime() - new Date(b.scheduled_at!).getTime())
-                      .map((draft) => (
+                    {sortedScheduledDrafts.map((draft) => (
                         <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
                           <div className="group cursor-pointer rounded-lg border p-4 transition-colors hover:border-primary/50 hover:bg-muted/50">
                             <div className="flex items-start justify-between gap-4">

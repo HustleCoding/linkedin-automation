@@ -32,8 +32,8 @@ function ContentLabContent() {
     postImage: null,
     isGeneratingImage: false,
   })
-  const [scheduledDate, setScheduledDate] = useState<Date | null>(null)
-  const [scheduledTime, setScheduledTime] = useState<string>("09:00")
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined)
+  const [scheduledTime, setScheduledTime] = useState<string | undefined>("09:00")
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
   const [isDraftsPanelOpen, setIsDraftsPanelOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
@@ -66,6 +66,9 @@ function ContentLabContent() {
           const date = new Date(draft.scheduled_at)
           setScheduledDate(date)
           setScheduledTime(`${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`)
+        } else {
+          setScheduledDate(undefined)
+          setScheduledTime("09:00")
         }
       }
     }
@@ -79,7 +82,7 @@ function ContentLabContent() {
       postImage: null,
       isGeneratingImage: false,
     })
-    setScheduledDate(null)
+    setScheduledDate(undefined)
     setScheduledTime("09:00")
     setCurrentDraftId(null)
     router.push("/content-lab")
@@ -137,7 +140,7 @@ function ContentLabContent() {
       setScheduledDate(date)
       setScheduledTime(`${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`)
     } else {
-      setScheduledDate(null)
+      setScheduledDate(undefined)
       setScheduledTime("09:00")
     }
     setIsDraftsPanelOpen(false)
