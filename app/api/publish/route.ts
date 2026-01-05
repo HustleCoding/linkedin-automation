@@ -4,6 +4,18 @@ import { NextResponse } from "next/server"
 const LINKEDIN_POSTS_API = "https://api.linkedin.com/v2/posts"
 const LINKEDIN_IMAGES_API = "https://api.linkedin.com/v2/images"
 
+const parseJsonSafely = async (response: Response) => {
+  const text = await response.text()
+  if (!text) {
+    return null
+  }
+  try {
+    return JSON.parse(text)
+  } catch {
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   const supabase = await createClient()
 
@@ -97,9 +109,9 @@ export async function POST(request: Request) {
         }),
       })
 
-      const initData = await initResponse.json()
+      const initData = await parseJsonSafely(initResponse)
 
-      if (!initResponse.ok) {
+      if (!initResponse.ok || !initData) {
         console.error("Image init failed:", initData)
       } else {
         const uploadUrl = initData.value?.uploadUrl
@@ -161,12 +173,18 @@ export async function POST(request: Request) {
       body: JSON.stringify(postPayload),
     })
 
-    const postResult = await postResponse.json()
+    const postResult = await parseJsonSafely(postResponse)
 
     if (!postResponse.ok) {
       console.error("LinkedIn post failed:", postResult)
-      const errorMessage = postResult.message || "Failed to publish to LinkedIn"
-      const isRevokedToken = postResult.code === "REVOKED_ACCESS_TOKEN" || postResult.serviceErrorCode === 65601
+      const errorMessage =
+        (postResult && typeof postResult === "object" && "message" in postResult && postResult.message) ||
+        postResponse.statusText ||
+        "Failed to publish to LinkedIn"
+      const isRevokedToken =
+        postResult && typeof postResult === "object"
+          ? postResult.code === "REVOKED_ACCESS_TOKEN" || postResult.serviceErrorCode === 65601
+          : false
 
       if (draftId) {
         await supabase
@@ -192,7 +210,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errorMessage }, { status: 400 })
     }
 
-    const postId = postResult.id || postResponse.headers.get("x-restli-id")
+    const postId =
+      (postResult && typeof postResult === "object" && "id" in postResult && postResult.id) ||
+      postResponse.headers.get("x-restli-id")
 
     if (draftId) {
       await supabase
