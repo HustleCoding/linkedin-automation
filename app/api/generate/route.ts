@@ -30,13 +30,13 @@ You are writing LinkedIn posts in the style of Justin Welsh, a top LinkedIn crea
 
 CRITICAL STYLE RULES:
 1. **SHORT LINES**: Each line should be 1 sentence MAX. Often just a fragment. Never write paragraphs.
-2. **BOLD STATS**: When using numbers or statistics, format them for emphasis (e.g., "40x more opportunities", "270% growth", "82% of buyers")
+2. **EMPHASIZE STATS**: Make numbers or statistics stand out using wording and line breaks (e.g., "40x more opportunities", "270% growth", "82% of buyers"). No markdown formatting.
 3. **WHITE SPACE**: Use lots of line breaks. Every sentence gets its own line. Add blank lines between sections.
 4. **HOOKS**: Start with a controversial statement, surprising stat, or pattern interrupt. The first line decides if people read on.
 5. **NO FLUFF**: Every word must earn its place. Cut ruthlessly. If it doesn't add value, delete it.
 6. **CONTRARIAN TAKES**: Challenge common beliefs. Say what others are afraid to say.
 7. **PERSONAL**: Use "I" statements. Share real experiences. Be vulnerable.
-8. **SCANNABLE**: Use bullets (•), numbered lists, and bold text (**text**) to make posts easy to skim.
+8. **SCANNABLE**: Use bullets (•) and numbered lists to make posts easy to skim. No markdown or asterisks.
 9. **CTA AT END**: End with a question or call-to-action that invites engagement.
 10. **HASHTAGS**: Only 2-3 hashtags, placed at the very end after a line break.
 
@@ -59,7 +59,7 @@ They're wrong.
 
 Here's what actually works:
 
-• Point 1 with **bold stat**
+• Point 1 with a standout stat
 • Point 2 with specific example
 • Point 3 with actionable insight
 
@@ -96,6 +96,7 @@ Requirements:
 - Must stop the scroll instantly
 - Use a pattern interrupt, contrarian take, or surprising stat
 - Match the ${tone} tone
+- No markdown formatting or asterisks (**)
 - NO hashtags
 - NO explanation - output ONLY the hook text`
     } else {
@@ -118,12 +119,12 @@ Requirements:
 - Follow the Justin Welsh format EXACTLY
 - Start with a scroll-stopping hook
 - Use SHORT lines (1 sentence max each)
-- Include **bold formatting** for key stats/points
 - Add bullet points (•) where appropriate
 - 150-200 words total
 - End with engaging question
 - Include ${trend.tag} naturally
 - Add 2-3 relevant hashtags at the end
+- No markdown formatting or asterisks (**)
 - NO explanation - output ONLY the post text`
     }
 
@@ -134,7 +135,8 @@ Requirements:
       maxTokens: 600,
     })
 
-    return Response.json({ content: text.trim() })
+    const cleanedText = text.replace(/\*\*/g, "").trim()
+    return Response.json({ content: cleanedText })
   } catch (error) {
     console.error("Generate API error:", error)
     if (error instanceof z.ZodError) {

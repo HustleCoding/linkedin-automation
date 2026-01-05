@@ -1,5 +1,7 @@
 import { generateObject } from "ai"
 import { z } from "zod"
+import { createClient } from "@/lib/supabase/server"
+import { NextResponse } from "next/server"
 
 const competitorSchema = z.object({
   profile: z.object({
@@ -30,11 +32,22 @@ const competitorSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const { profileUrl, name } = await req.json()
 
     if (!profileUrl && !name) {
-      return Response.json({ error: "Profile URL or name is required" }, { status: 400 })
+      return NextResponse.json({ error: "Profile URL or name is required" }, { status: 400 })
     }
 
     const identifier = profileUrl || name
@@ -57,9 +70,25 @@ Focus on actionable insights that can help someone improve their own LinkedIn co
       maxOutputTokens: 2500,
     })
 
-    return Response.json({ analysis: object })
+    const { data: historyItem, error: historyError } = await supabase
+      .from("research_history")
+      .insert({
+        user_id: user.id,
+        kind: "competitor",
+        query: identifier,
+        depth: null,
+        result: object,
+      })
+      .select()
+      .single()
+
+    if (historyError) {
+      console.error("Failed to save competitor history:", historyError)
+    }
+
+    return NextResponse.json({ analysis: object, historyItem: historyItem || null })
   } catch (error) {
     console.error("Competitor analysis error:", error)
-    return Response.json({ error: "Failed to analyze competitor" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to analyze competitor" }, { status: 500 })
   }
 }

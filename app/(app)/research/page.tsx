@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { Sidebar } from "@/components/layout/sidebar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,6 +16,7 @@ import {
   Lightbulb,
   Hash,
   HelpCircle,
+  History,
   Target,
   BookOpen,
   UserSearch,
@@ -25,49 +26,15 @@ import {
   Zap,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useResearchHistory } from "@/hooks/use-research-history"
+import type { CompetitorAnalysis, ResearchResult } from "@/lib/types/research"
 
-interface ResearchResult {
-  overview: string
-  keyInsights: Array<{
-    title: string
-    description: string
-    relevance: "high" | "medium" | "low"
-  }>
-  contentAngles: Array<{
-    angle: string
-    hook: string
-    format: string
-  }>
-  hashtags: string[]
-  audienceInsights: {
-    primaryAudience: string
-    painPoints: string[]
-    motivations: string[]
+const formatHistoryTimestamp = (value: string) => {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) {
+    return ""
   }
-  trendingQuestions: string[]
-}
-
-interface CompetitorAnalysis {
-  profile: {
-    name: string
-    headline: string
-    estimatedFollowers: string
-    niche: string
-    postingFrequency: string
-  }
-  contentStrategy: {
-    primaryThemes: string[]
-    contentFormats: string[]
-    toneOfVoice: string
-    uniqueApproach: string
-  }
-  topPerformingContent: Array<{
-    type: string
-    topic: string
-    whyItWorks: string
-  }>
-  lessonsToLearn: string[]
-  gaps: string[]
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(date)
 }
 
 function ResearchContent() {
@@ -80,6 +47,25 @@ function ResearchContent() {
   const [competitorResult, setCompetitorResult] = useState<CompetitorAnalysis | null>(null)
   const [copiedHook, setCopiedHook] = useState<string | null>(null)
   const { toast } = useToast()
+  const { history, isLoading: isHistoryLoading, refresh: refreshHistory } = useResearchHistory()
+  const topicHistory = history.filter((item) => item.kind === "topic")
+  const competitorHistory = history.filter((item) => item.kind === "competitor")
+
+  useEffect(() => {
+    if (!researchResult && topicHistory.length > 0) {
+      const latest = topicHistory[0]
+      setResearchResult(latest.result as ResearchResult)
+      setTopicQuery(latest.query)
+    }
+  }, [researchResult, topicHistory])
+
+  useEffect(() => {
+    if (!competitorResult && competitorHistory.length > 0) {
+      const latest = competitorHistory[0]
+      setCompetitorResult(latest.result as CompetitorAnalysis)
+      setCompetitorQuery(latest.query)
+    }
+  }, [competitorResult, competitorHistory])
 
   const handleTopicResearch = async () => {
     if (!topicQuery.trim()) return
@@ -94,6 +80,7 @@ function ResearchContent() {
       if (!response.ok) throw new Error("Research failed")
       const data = await response.json()
       setResearchResult(data.research)
+      refreshHistory()
     } catch {
       toast({
         title: "Research failed",
@@ -118,6 +105,7 @@ function ResearchContent() {
       if (!response.ok) throw new Error("Analysis failed")
       const data = await response.json()
       setCompetitorResult(data.analysis)
+      refreshHistory()
     } catch {
       toast({
         title: "Analysis failed",
@@ -220,6 +208,47 @@ function ResearchContent() {
                       )}
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5 text-primary" />
+                    Research History
+                  </CardTitle>
+                  <CardDescription>Reopen any of your past topic research runs</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isHistoryLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                      ))}
+                    </div>
+                  ) : topicHistory.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No saved topics yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {topicHistory.slice(0, 8).map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setResearchResult(item.result as ResearchResult)
+                            setTopicQuery(item.query)
+                          }}
+                          className="flex w-full items-center justify-between rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
+                        >
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-foreground">{item.query}</p>
+                            <p className="text-xs text-muted-foreground">{formatHistoryTimestamp(item.created_at)}</p>
+                          </div>
+                          <span className="text-xs font-medium text-primary">View</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -461,6 +490,47 @@ function ResearchContent() {
                       )}
                     </Button>
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5 text-primary" />
+                    Competitor History
+                  </CardTitle>
+                  <CardDescription>Jump back into a previous competitor analysis</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isHistoryLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-12 w-full" />
+                      ))}
+                    </div>
+                  ) : competitorHistory.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No saved competitors yet.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {competitorHistory.slice(0, 8).map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setCompetitorResult(item.result as CompetitorAnalysis)
+                            setCompetitorQuery(item.query)
+                          }}
+                          className="flex w-full items-center justify-between rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
+                        >
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium text-foreground">{item.query}</p>
+                            <p className="text-xs text-muted-foreground">{formatHistoryTimestamp(item.created_at)}</p>
+                          </div>
+                          <span className="text-xs font-medium text-primary">View</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 

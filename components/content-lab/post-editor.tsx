@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Sparkles, Lightbulb, Bold, Italic, List, Link2, ImagePlus, X, Palette, Loader2 } from "lucide-react"
+import { Sparkles, Lightbulb, Italic, List, Link2, ImagePlus, X, Palette, Loader2 } from "lucide-react"
 import { SparkleLoader } from "./sparkle-loader"
 import { cn } from "@/lib/utils"
 
@@ -122,10 +122,6 @@ export function PostEditor({
     let newCursorPos = end
 
     switch (format) {
-      case "bold":
-        newText = content.substring(0, start) + `**${selectedText}**` + content.substring(end)
-        newCursorPos = end + 4
-        break
       case "italic":
         newText = content.substring(0, start) + `_${selectedText}_` + content.substring(end)
         newCursorPos = end + 2
@@ -213,15 +209,6 @@ export function PostEditor({
           </DropdownMenu>
 
           <div className="h-4 w-px bg-border" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-muted active:bg-muted/80"
-            onClick={() => formatText("bold")}
-            aria-label="Bold"
-          >
-            <Bold className="h-4 w-4" />
-          </Button>
           <Button
             variant="ghost"
             size="icon"

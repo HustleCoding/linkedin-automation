@@ -1,5 +1,7 @@
 import { generateObject } from "ai"
 import { z } from "zod"
+import { createClient } from "@/lib/supabase/server"
+import { NextResponse } from "next/server"
 
 const researchSchema = z.object({
   overview: z.string().describe("A comprehensive overview of the topic (2-3 paragraphs)"),
@@ -33,11 +35,22 @@ const researchSchema = z.object({
 })
 
 export async function POST(req: Request) {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
+
+  if (authError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+  }
+
   try {
     const { topic, depth } = await req.json()
 
     if (!topic) {
-      return Response.json({ error: "Topic is required" }, { status: 400 })
+      return NextResponse.json({ error: "Topic is required" }, { status: 400 })
     }
 
     const depthContext =
@@ -66,9 +79,25 @@ Focus on actionable insights that can be turned into high-performing LinkedIn po
       maxOutputTokens: 3000,
     })
 
-    return Response.json({ research: object })
+    const { data: historyItem, error: historyError } = await supabase
+      .from("research_history")
+      .insert({
+        user_id: user.id,
+        kind: "topic",
+        query: topic,
+        depth: depth || "standard",
+        result: object,
+      })
+      .select()
+      .single()
+
+    if (historyError) {
+      console.error("Failed to save research history:", historyError)
+    }
+
+    return NextResponse.json({ research: object, historyItem: historyItem || null })
   } catch (error) {
     console.error("Research API error:", error)
-    return Response.json({ error: "Failed to research topic" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to research topic" }, { status: 500 })
   }
 }

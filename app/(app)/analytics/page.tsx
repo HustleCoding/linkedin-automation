@@ -17,8 +17,6 @@ import {
   FileText,
   Loader2,
   AlertCircle,
-  Crown,
-  ExternalLink,
 } from "lucide-react"
 import { useDrafts } from "@/hooks/use-drafts"
 import { formatDistanceToNow } from "date-fns"
@@ -90,30 +88,6 @@ function AnalyticsContent() {
               Refresh
             </Button>
           </div>
-
-          {/* Premium Analytics Prompt */}
-          <Card className="mb-6 sm:mb-8 border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0">
-                  <Crown className="h-6 w-6 text-amber-500" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground mb-1">Unlock Advanced Analytics</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Upgrade to Ayrshare Premium to access detailed post impressions, engagement rates, follower growth,
-                    and more.
-                  </p>
-                </div>
-                <Button asChild className="gap-2 shrink-0">
-                  <a href="https://www.ayrshare.com/pricing" target="_blank" rel="noopener noreferrer">
-                    Upgrade Plan
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Content Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
