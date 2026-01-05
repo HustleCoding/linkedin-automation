@@ -82,9 +82,9 @@ export function Sidebar({ onOpenDrafts, onNewDraft }: SidebarProps) {
   return (
     <>
       {/* Mobile Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between border-b border-border bg-background px-4 h-16 lg:hidden">
+      <div className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-border/70 bg-background/80 px-4 shadow-sm backdrop-blur-md lg:hidden">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-sky-400 shadow-sm">
             <span className="text-sm font-bold text-primary-foreground">LA</span>
           </div>
           <span className="font-semibold text-foreground">LinkAgent</span>
@@ -112,16 +112,16 @@ export function Sidebar({ onOpenDrafts, onNewDraft }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r border-border bg-sidebar transition-transform duration-300 ease-in-out",
+          "fixed left-0 top-16 z-40 h-[calc(100vh-4rem)] w-64 border-r border-sidebar-border/70 bg-sidebar/85 shadow-sm transition-transform duration-300 ease-in-out backdrop-blur-xl",
           "lg:top-0 lg:h-screen lg:translate-x-0",
           mobileOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="flex h-full flex-col">
           {/* Logo - Desktop only */}
-          <div className="hidden border-b border-sidebar-border px-4 py-4 lg:block">
+          <div className="hidden border-b border-sidebar-border/70 px-4 py-4 lg:block">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-sky-400 shadow-sm">
                 <span className="text-lg font-bold text-primary-foreground">LA</span>
               </div>
               <div>
@@ -132,29 +132,35 @@ export function Sidebar({ onOpenDrafts, onNewDraft }: SidebarProps) {
           </div>
 
           {/* Drafts actions section */}
-          <div className="px-3 pt-4 pb-2 space-y-1">
-            <Button
-              variant="default"
-              className="w-full justify-start gap-2"
-              onClick={() => {
-                onNewDraft?.()
-                setMobileOpen(false)
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              New Post
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full justify-start gap-2 bg-transparent"
-              onClick={() => {
-                onOpenDrafts?.()
-                setMobileOpen(false)
-              }}
-            >
-              <FileText className="h-4 w-4" />
-              My Drafts
-            </Button>
+          <div className="space-y-3 px-3 pt-4 pb-2">
+            <div className="rounded-2xl border border-sidebar-border/70 bg-sidebar-accent/40 p-3 shadow-sm">
+              <Button
+                variant="default"
+                className="w-full justify-start gap-2 shadow-sm"
+                onClick={() => {
+                  onNewDraft?.()
+                  setMobileOpen(false)
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                New Post
+              </Button>
+              <Button
+                variant="ghost"
+                className="mt-2 w-full justify-start gap-2 text-sidebar-foreground hover:bg-sidebar-accent/70"
+                onClick={() => {
+                  onOpenDrafts?.()
+                  setMobileOpen(false)
+                }}
+              >
+                <FileText className="h-4 w-4" />
+                My Drafts
+              </Button>
+            </div>
+            <div className="flex items-center justify-between rounded-xl border border-sidebar-border/70 bg-sidebar/60 px-3 py-2 text-xs text-muted-foreground">
+              <span>Plan</span>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-primary">Pro</span>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -168,12 +174,15 @@ export function Sidebar({ onOpenDrafts, onNewDraft }: SidebarProps) {
                   href={item.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-all",
                     isActive
-                      ? "bg-sidebar-accent text-primary"
-                      : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      ? "bg-sidebar-accent text-primary shadow-sm"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground",
                   )}
                 >
+                  {isActive && (
+                    <span className="absolute left-2 top-1/2 h-6 w-1 -translate-y-1/2 rounded-full bg-primary" />
+                  )}
                   <item.icon className="h-5 w-5" />
                   {item.label}
                 </a>
@@ -182,10 +191,10 @@ export function Sidebar({ onOpenDrafts, onNewDraft }: SidebarProps) {
           </nav>
 
           {/* User Profile */}
-          <div className="border-t border-sidebar-border p-3">
+          <div className="border-t border-sidebar-border/70 p-3">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-sidebar-accent">
+                <button className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border/70 bg-sidebar-accent/40 px-3 py-2.5 text-left shadow-sm transition-colors hover:bg-sidebar-accent/70">
                   <Avatar className="h-9 w-9">
                     <AvatarImage src="/placeholder.svg?height=36&width=36" alt="User" />
                     <AvatarFallback>{getInitials(userEmail)}</AvatarFallback>

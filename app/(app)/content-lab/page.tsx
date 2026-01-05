@@ -7,10 +7,13 @@ import { TrendDiscovery } from "@/components/content-lab/trend-discovery"
 import { AIWorkspace } from "@/components/content-lab/ai-workspace"
 import { SchedulingBar } from "@/components/content-lab/scheduling-bar"
 import { DraftsPanel } from "@/components/content-lab/drafts-panel"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { useDrafts } from "@/hooks/use-drafts"
 import type { Tone } from "@/lib/types/draft"
 import type { Trend } from "@/lib/types/trends"
+import { FileText, PenLine, Sparkles } from "lucide-react"
 
 export interface EditorState {
   content: string
@@ -37,6 +40,31 @@ function ContentLabContent() {
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
   const [isDraftsPanelOpen, setIsDraftsPanelOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+
+  const draftCount = drafts?.filter((d) => d.status === "draft").length || 0
+  const scheduledCount = drafts?.filter((d) => d.status === "scheduled").length || 0
+  const publishedCount = drafts?.filter((d) => d.status === "published").length || 0
+
+  const heroHighlights = [
+    {
+      label: "Drafts",
+      value: draftCount,
+      helper: "In progress",
+      tone: "text-foreground",
+    },
+    {
+      label: "Scheduled",
+      value: scheduledCount,
+      helper: "Ready to publish",
+      tone: "text-primary",
+    },
+    {
+      label: "Published",
+      value: publishedCount,
+      helper: "Live on LinkedIn",
+      tone: "text-foreground",
+    },
+  ]
 
   useEffect(() => {
     const supabase = createBrowserClient()
@@ -155,29 +183,79 @@ function ContentLabContent() {
   }
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-background">
+    <div className="relative flex min-h-screen overflow-x-hidden bg-background">
       <Sidebar onNewPost={handleNewPost} onOpenDrafts={() => setIsDraftsPanelOpen(true)} />
 
-      <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-24 sm:pb-20 md:ml-64 md:pt-0">
-        <div className="mx-auto max-w-7xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8">
+      <main className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-24 md:ml-64 md:pt-0">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-28 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-36 left-[-7rem] h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
+          <div className="absolute bottom-[-10rem] right-1/3 h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-4 sm:mb-6">
-            <h1 className="text-xl font-bold text-foreground sm:text-2xl">Content Lab</h1>
-            <p className="text-sm text-muted-foreground">Create, optimize, and schedule your LinkedIn content</p>
+          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
+            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  AI studio
+                </Badge>
+                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                  Content Lab
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                  Turn trends into polished posts, then schedule them without leaving the workspace.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Button className="gap-2" onClick={handleNewPost}>
+                    <PenLine className="h-4 w-4" />
+                    New post
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2 bg-background/70"
+                    onClick={() => setIsDraftsPanelOpen(true)}
+                  >
+                    <FileText className="h-4 w-4" />
+                    View drafts
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {heroHighlights.map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                    <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.helper}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Trend Discovery */}
-          <TrendDiscovery onDraftPost={handleDraftFromTrend} isGenerating={editorState.isGenerating} />
+          <div className="mt-8">
+            <TrendDiscovery onDraftPost={handleDraftFromTrend} isGenerating={editorState.isGenerating} />
+          </div>
 
           {/* AI Workspace - Pass editorState and handler functions */}
-          <AIWorkspace
-            editorState={editorState}
-            onContentChange={(content) => setEditorState((prev) => ({ ...prev, content }))}
-            onToneChange={(tone) => setEditorState((prev) => ({ ...prev, tone: tone as Tone }))}
-            onGeneratingChange={(isGenerating) => setEditorState((prev) => ({ ...prev, isGenerating }))}
-            onImageChange={(postImage) => setEditorState((prev) => ({ ...prev, postImage }))}
-            onImageGeneratingChange={(isGeneratingImage) => setEditorState((prev) => ({ ...prev, isGeneratingImage }))}
-          />
+          <div className="mt-8">
+            <AIWorkspace
+              editorState={editorState}
+              onContentChange={(content) => setEditorState((prev) => ({ ...prev, content }))}
+              onToneChange={(tone) => setEditorState((prev) => ({ ...prev, tone: tone as Tone }))}
+              onGeneratingChange={(isGenerating) => setEditorState((prev) => ({ ...prev, isGenerating }))}
+              onImageChange={(postImage) => setEditorState((prev) => ({ ...prev, postImage }))}
+              onImageGeneratingChange={(isGeneratingImage) => setEditorState((prev) => ({
+                ...prev,
+                isGeneratingImage,
+              }))}
+            />
+          </div>
         </div>
       </main>
 

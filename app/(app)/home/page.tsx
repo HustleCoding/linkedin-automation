@@ -84,21 +84,100 @@ export default function HomePage() {
       title: "Find Trends",
       description: "Discover trending topics",
       href: "/content-lab",
-      color: "bg-emerald-500/10 text-emerald-500",
+      color: "bg-emerald-500/10 text-emerald-600",
     },
     {
       icon: Calendar,
       title: "Schedule",
       description: "View your content calendar",
       href: "/schedule",
-      color: "bg-amber-500/10 text-amber-500",
+      color: "bg-amber-500/10 text-amber-600",
     },
     {
       icon: BarChart3,
       title: "Analytics",
       description: "Track your performance",
       href: "/analytics",
-      color: "bg-violet-500/10 text-violet-500",
+      color: "bg-sky-500/10 text-sky-600",
+    },
+  ]
+
+  const heroHighlights = [
+    {
+      label: "Posts today",
+      value: todayCount,
+      helper: "Scheduled in next 24h",
+      tone: "text-primary",
+    },
+    {
+      label: "This week",
+      value: weekCount,
+      helper: "Upcoming schedule",
+      tone: "text-foreground",
+    },
+    {
+      label: "Queued",
+      value: scheduledCount,
+      helper: "Ready to publish",
+      tone: "text-foreground",
+    },
+  ]
+
+  const statCards = [
+    {
+      icon: FileText,
+      label: "Drafts",
+      value: draftCount,
+      description: "Ideas in progress",
+      color: "bg-slate-900/5 text-slate-700",
+    },
+    {
+      icon: Clock,
+      label: "Scheduled",
+      value: scheduledCount,
+      description: "Next up in queue",
+      color: "bg-sky-500/10 text-sky-700",
+    },
+    {
+      icon: Send,
+      label: "Published",
+      value: publishedCount,
+      description: "Shared publicly",
+      color: "bg-emerald-500/10 text-emerald-700",
+    },
+    {
+      icon: ImageIcon,
+      label: "With Images",
+      value: withImageCount,
+      description: "Visual posts",
+      color: "bg-amber-500/10 text-amber-700",
+    },
+  ]
+
+  const weeklySummary = [
+    {
+      label: "Posts Today",
+      value: todayCount,
+      helper: "Scheduled in the next 24h",
+      tone: "text-primary",
+    },
+    {
+      label: "Posts This Week",
+      value: weekCount,
+      helper: "Scheduled in the next 7 days",
+      tone: "text-foreground",
+    },
+    {
+      label: "In Progress",
+      value: draftCount,
+      helper: "Drafts being refined",
+      tone: "text-foreground",
+    },
+    {
+      label: "Published",
+      value: publishedCount,
+      helper: "Already live",
+      tone: "text-foreground",
     },
   ]
 
@@ -111,26 +190,67 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto pt-16 pb-8 md:ml-64 md:pt-0">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-              Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}
-            </h1>
-            <p className="mt-1 text-muted-foreground">Here's what's happening with your LinkedIn content</p>
+      <main className="relative flex-1 overflow-y-auto pt-16 pb-10 md:ml-64 md:pt-0">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-32 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-32 left-[-7rem] h-96 w-96 rounded-full bg-amber-300/15 blur-3xl" />
+          <div className="absolute bottom-[-10rem] right-1/4 h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          {/* Hero */}
+          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
+            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Weekly cadence
+                </Badge>
+                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+                  Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}
+                </h1>
+                <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                  Draft, refine, and schedule with a clear view of what ships today and what's next.
+                </p>
+                <div className="mt-6 flex flex-wrap gap-3">
+                  <Link href="/content-lab">
+                    <Button className="gap-2">
+                      <PenLine className="h-4 w-4" />
+                      New post
+                    </Button>
+                  </Link>
+                  <Link href="/content-lab">
+                    <Button variant="outline" className="gap-2 bg-background/60">
+                      <TrendingUp className="h-4 w-4" />
+                      Explore trends
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                {heroHighlights.map((item) => (
+                  <div key={item.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                    <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
+                    <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
+                    <p className="text-xs text-muted-foreground">{item.helper}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Quick Actions */}
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {quickActions.map((action) => (
               <Link key={action.title} href={action.href}>
-                <Card className="group cursor-pointer transition-all hover:border-primary/50 hover:shadow-md">
+                <Card className="group relative cursor-pointer overflow-hidden border-border/70 bg-card/80 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
                   <CardContent className="flex items-center gap-4 p-4">
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${action.color}`}>
+                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${action.color}`}>
                       <action.icon className="h-6 w-6" />
                     </div>
                     <div className="flex-1">
@@ -144,67 +264,39 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Stats */}
-          <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                  <FileText className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{draftCount}</p>
-                  <p className="text-sm text-muted-foreground">Drafts</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                  <Clock className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{scheduledCount}</p>
-                  <p className="text-sm text-muted-foreground">Scheduled</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                  <Send className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{publishedCount}</p>
-                  <p className="text-sm text-muted-foreground">Published</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-                  <ImageIcon className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{withImageCount}</p>
-                  <p className="text-sm text-muted-foreground">With Images</p>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Snapshot */}
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((stat) => (
+              <Card key={stat.label} className="border-border/70 bg-card/80 shadow-sm">
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-foreground">{stat.value}</p>
+                    <p className="text-sm font-medium text-foreground">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground">{stat.description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
-          {/* Recent & Upcoming */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Recent Drafts */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-semibold">Recent Drafts</CardTitle>
+          {/* Activity */}
+          <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <Card className="border-border/70 bg-card/80 shadow-sm lg:col-span-2">
+              <CardHeader className="flex flex-row items-center justify-between pb-4">
+                <div>
+                  <CardTitle className="text-lg font-semibold">Recent Drafts</CardTitle>
+                  <p className="text-sm text-muted-foreground">Pick up right where you left off.</p>
+                </div>
                 <Link href="/content-lab">
                   <Button variant="ghost" size="sm" className="text-primary">
                     View All
                   </Button>
                 </Link>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-5">
                 {isLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -221,10 +313,10 @@ export default function HomePage() {
                   </div>
                 ) : (
                   recentDrafts.map((draft) => (
-                    <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
-                      <div className="group cursor-pointer rounded-lg border p-3 transition-colors hover:border-primary/50 hover:bg-muted/50">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="line-clamp-2 flex-1 text-sm text-foreground">
+                    <Link key={draft.id} href={`/content-lab?draft=${draft.id}`} className="block">
+                      <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="line-clamp-2 flex-1 text-sm font-medium text-foreground">
                             {draft.content || "Empty draft"}
                           </p>
                           <Badge
@@ -235,91 +327,94 @@ export default function HomePage() {
                                   ? "secondary"
                                   : "outline"
                             }
-                            className="shrink-0 text-xs"
+                            className="shrink-0 text-xs capitalize"
                           >
                             {draft.status}
                           </Badge>
                         </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {new Date(draft.updated_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </Link>
-                  ))
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Upcoming Scheduled */}
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-semibold">Upcoming Posts</CardTitle>
-                <Link href="/schedule">
-                  <Button variant="ghost" size="sm" className="text-primary">
-                    View Calendar
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {isLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-                  </div>
-                ) : upcomingScheduled.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground">
-                    <Calendar className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                    <p>No scheduled posts</p>
-                    <Link href="/content-lab">
-                      <Button variant="link" className="mt-2 text-primary">
-                        Schedule a post
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  upcomingScheduled.map((draft) => (
-                    <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
-                      <div className="group cursor-pointer rounded-lg border p-3 transition-colors hover:border-primary/50 hover:bg-muted/50">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="line-clamp-2 flex-1 text-sm text-foreground">
-                            {draft.content || "Empty draft"}
-                          </p>
-                          {draft.image_url && <ImageIcon className="h-4 w-4 shrink-0 text-muted-foreground" />}
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          Updated {new Date(draft.updated_at).toLocaleDateString()}
                         </div>
-                        <p className="mt-1 text-xs text-primary">{new Date(draft.scheduled_at!).toLocaleString()}</p>
                       </div>
                     </Link>
                   ))
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* This Week Summary */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold">This Week</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-4">
-                <div className="rounded-lg bg-muted/50 p-4 text-center">
-                  <p className="text-2xl font-bold text-primary">{todayCount}</p>
-                  <p className="text-sm text-muted-foreground">Posts Today</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{weekCount}</p>
-                  <p className="text-sm text-muted-foreground">Posts This Week</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{draftCount}</p>
-                  <p className="text-sm text-muted-foreground">In Progress</p>
-                </div>
-                <div className="rounded-lg bg-muted/50 p-4 text-center">
-                  <p className="text-2xl font-bold text-foreground">{publishedCount}</p>
-                  <p className="text-sm text-muted-foreground">Published</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <div className="space-y-6">
+              <Card className="border-border/70 bg-card/80 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between pb-4">
+                  <div>
+                    <CardTitle className="text-lg font-semibold">Upcoming Posts</CardTitle>
+                    <p className="text-sm text-muted-foreground">Next on your calendar.</p>
+                  </div>
+                  <Link href="/schedule">
+                    <Button variant="ghost" size="sm" className="text-primary">
+                      View Calendar
+                    </Button>
+                  </Link>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                    </div>
+                  ) : upcomingScheduled.length === 0 ? (
+                    <div className="py-8 text-center text-muted-foreground">
+                      <Calendar className="mx-auto mb-2 h-8 w-8 opacity-50" />
+                      <p>No scheduled posts</p>
+                      <Link href="/content-lab">
+                        <Button variant="link" className="mt-2 text-primary">
+                          Schedule a post
+                        </Button>
+                      </Link>
+                    </div>
+                  ) : (
+                    upcomingScheduled.map((draft) => (
+                      <Link key={draft.id} href={`/content-lab?draft=${draft.id}`} className="block">
+                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="line-clamp-2 flex-1 text-sm font-medium text-foreground">
+                              {draft.content || "Empty draft"}
+                            </p>
+                            {draft.image_url && (
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                                <ImageIcon className="h-4 w-4" />
+                              </div>
+                            )}
+                          </div>
+                          <p className="mt-2 text-xs text-primary">
+                            {new Date(draft.scheduled_at!).toLocaleString()}
+                          </p>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/70 bg-card/80 shadow-sm">
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold">Weekly Rhythm</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {weeklySummary.map((item) => (
+                    <div key={item.label} className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{item.label}</p>
+                        <p className="text-xs text-muted-foreground">{item.helper}</p>
+                      </div>
+                      <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
+                    </div>
+                  ))}
+                  <div className="rounded-xl border border-border/60 bg-background/70 p-3 text-xs text-muted-foreground">
+                    Keep a steady pace to build audience trust. Scheduling 3-5 posts per week keeps reach consistent.
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
       </main>
     </div>

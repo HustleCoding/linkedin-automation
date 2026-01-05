@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useDrafts } from "@/hooks/use-drafts"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { ChevronLeft, ChevronRight, CalendarIcon, List, ImageIcon, Clock } from "lucide-react"
+import { ChevronLeft, ChevronRight, CalendarIcon, List, ImageIcon, Clock, TrendingUp, Sparkles } from "lucide-react"
 
 export default function SchedulePage() {
   const router = useRouter()
@@ -99,6 +99,42 @@ export default function SchedulePage() {
 
   const withImageCount = scheduledDrafts.filter((d) => d.image_url).length
 
+  const statCards = [
+    {
+      label: "Scheduled",
+      value: scheduledDrafts.length,
+      helper: "Total queued",
+      icon: CalendarIcon,
+      color: "bg-primary/10 text-primary",
+    },
+    {
+      label: "Today",
+      value: todayCount,
+      helper: "Going live today",
+      icon: Clock,
+      color: "bg-emerald-500/10 text-emerald-700",
+    },
+    {
+      label: "This Week",
+      value: weekCount,
+      helper: "Next 7 days",
+      icon: TrendingUp,
+      color: "bg-sky-500/10 text-sky-700",
+    },
+    {
+      label: "With Images",
+      value: withImageCount,
+      helper: "Visual posts",
+      icon: ImageIcon,
+      color: "bg-amber-500/10 text-amber-700",
+    },
+  ]
+
+  const monthLabel = currentDate.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  })
+
   if (isAuthenticated === null) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -108,89 +144,93 @@ export default function SchedulePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
       <Sidebar />
 
-      <main className="flex-1 overflow-y-auto pt-16 pb-8 md:ml-64 md:pt-0">
-        <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="relative flex-1 overflow-y-auto pt-16 pb-10 md:ml-64 md:pt-0">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -top-28 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+          <div className="absolute top-40 left-[-7rem] h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
+          <div className="absolute bottom-[-10rem] right-1/3 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Schedule</h1>
-              <p className="text-muted-foreground">Manage your upcoming LinkedIn posts</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "calendar" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("calendar")}
-              >
-                <CalendarIcon className="mr-1 h-4 w-4" />
-                Calendar
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="mr-1 h-4 w-4" />
-                List
-              </Button>
+          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
+            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="max-w-xl">
+                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  Scheduling overview
+                </Badge>
+                <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Schedule</h1>
+                <p className="mt-2 text-sm text-muted-foreground sm:text-base">
+                  Plan your LinkedIn cadence and keep your content calendar balanced.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/60 bg-background/70 p-2">
+                <Button
+                  variant={viewMode === "calendar" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("calendar")}
+                >
+                  <CalendarIcon className="mr-1 h-4 w-4" />
+                  Calendar
+                </Button>
+                <Button
+                  variant={viewMode === "list" ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("list")}
+                >
+                  <List className="mr-1 h-4 w-4" />
+                  List
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="mb-6 grid gap-4 sm:grid-cols-4">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-2xl font-bold">{scheduledDrafts.length}</p>
-                <p className="text-sm text-muted-foreground">Total Scheduled</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-2xl font-bold text-primary">{todayCount}</p>
-                <p className="text-sm text-muted-foreground">Today</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-2xl font-bold">{weekCount}</p>
-                <p className="text-sm text-muted-foreground">This Week</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-2xl font-bold">{withImageCount}</p>
-                <p className="text-sm text-muted-foreground">With Images</p>
-              </CardContent>
-            </Card>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((stat) => (
+              <Card key={stat.label} className="border-border/70 bg-card/80 shadow-sm">
+                <CardContent className="flex items-center gap-4 p-4">
+                  <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-semibold text-foreground">{stat.value}</p>
+                    <p className="text-sm font-medium text-foreground">{stat.label}</p>
+                    <p className="text-xs text-muted-foreground">{stat.helper}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
 
           {viewMode === "calendar" ? (
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-semibold">
-                  {currentDate.toLocaleDateString("en-US", {
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </CardTitle>
+            <Card className="mt-8 border-border/70 bg-card/80 shadow-sm">
+              <CardHeader className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <CardTitle className="text-lg font-semibold">{monthLabel}</CardTitle>
+                  <p className="text-sm text-muted-foreground">See every post scheduled this month.</p>
+                </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={goToToday}>
+                  <Button variant="outline" size="sm" className="bg-background/60" onClick={goToToday}>
                     Today
                   </Button>
-                  <Button variant="outline" size="icon" onClick={prevMonth}>
+                  <Button variant="outline" size="icon" className="bg-background/60" onClick={prevMonth}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" onClick={nextMonth}>
+                  <Button variant="outline" size="icon" className="bg-background/60" onClick={nextMonth}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 {/* Day headers */}
-                <div className="mb-2 grid grid-cols-7 gap-1 text-center text-xs font-medium text-muted-foreground sm:text-sm">
+                <div className="mb-2 grid grid-cols-7 gap-1 text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground sm:text-xs">
                   {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
                     <div key={day} className="py-2">
                       {day}
@@ -214,8 +254,10 @@ export default function SchedulePage() {
                     return (
                       <div
                         key={day}
-                        className={`min-h-[80px] rounded-lg border p-1 sm:min-h-[100px] sm:p-2 ${
-                          dayIsToday ? "border-primary bg-primary/5" : "border-border bg-card"
+                        className={`min-h-[80px] rounded-xl border p-1 transition-colors sm:min-h-[110px] sm:p-2 ${
+                          dayIsToday
+                            ? "border-primary/40 bg-primary/10"
+                            : "border-border/60 bg-background/60 hover:bg-background/90"
                         }`}
                       >
                         <span
@@ -228,7 +270,7 @@ export default function SchedulePage() {
                         <div className="mt-1 space-y-1">
                           {posts.slice(0, 2).map((post) => (
                             <Link key={post.id} href={`/content-lab?draft=${post.id}`}>
-                              <div className="cursor-pointer truncate rounded bg-primary/10 px-1 py-0.5 text-[10px] text-primary hover:bg-primary/20 sm:text-xs">
+                              <div className="cursor-pointer truncate rounded-md bg-primary/10 px-1 py-0.5 text-[10px] text-primary transition-colors hover:bg-primary/20 sm:text-xs">
                                 {new Date(post.scheduled_at!).toLocaleTimeString([], {
                                   hour: "2-digit",
                                   minute: "2-digit",
@@ -247,9 +289,10 @@ export default function SchedulePage() {
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="mt-8 border-border/70 bg-card/80 shadow-sm">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold">Scheduled Posts</CardTitle>
+                <p className="text-sm text-muted-foreground">Every post ready to go live.</p>
               </CardHeader>
               <CardContent>
                 {isLoading ? (
@@ -269,31 +312,33 @@ export default function SchedulePage() {
                 ) : (
                   <div className="space-y-3">
                     {sortedScheduledDrafts.map((draft) => (
-                        <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
-                          <div className="group cursor-pointer rounded-lg border p-4 transition-colors hover:border-primary/50 hover:bg-muted/50">
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="min-w-0 flex-1">
-                                <p className="line-clamp-2 text-sm text-foreground">{draft.content || "Empty draft"}</p>
-                                <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+                      <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
+                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="min-w-0 flex-1">
+                              <p className="line-clamp-2 text-sm font-medium text-foreground">
+                                {draft.content || "Empty draft"}
+                              </p>
+                              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(draft.scheduled_at!).toLocaleString()}
+                                </span>
+                                <Badge variant="outline" className="text-xs capitalize">
+                                  {draft.tone}
+                                </Badge>
+                                {draft.image_url && (
                                   <span className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {new Date(draft.scheduled_at!).toLocaleString()}
+                                    <ImageIcon className="h-3 w-3" />
+                                    Image
                                   </span>
-                                  <Badge variant="outline" className="text-xs">
-                                    {draft.tone}
-                                  </Badge>
-                                  {draft.image_url && (
-                                    <span className="flex items-center gap-1">
-                                      <ImageIcon className="h-3 w-3" />
-                                      Image
-                                    </span>
-                                  )}
-                                </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                        </Link>
-                      ))}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
               </CardContent>

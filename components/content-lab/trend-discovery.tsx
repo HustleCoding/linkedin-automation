@@ -62,14 +62,14 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
   }
 
   return (
-    <section className="border-b border-border px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+    <section className="rounded-3xl border border-border/70 bg-card/80 px-4 py-4 shadow-sm backdrop-blur sm:px-6 sm:py-6">
       {/* Header */}
-      <div className="mb-3 sm:mb-4 flex flex-col gap-3">
+      <div className="mb-3 flex flex-col gap-3 sm:mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-            <h2 className="font-semibold text-foreground text-sm sm:text-base">Trending Topics</h2>
-            <Badge variant="secondary" className="ml-1 text-[10px] sm:text-xs">
+            <h2 className="text-sm font-semibold text-foreground sm:text-base">Trending Topics</h2>
+            <Badge variant="secondary" className="ml-1 bg-primary/10 text-[10px] text-primary sm:text-xs">
               <Flame className="mr-0.5 sm:mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-500" />
               Live
             </Badge>
@@ -79,7 +79,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
             size="sm"
             onClick={() => refresh()}
             disabled={isBusy}
-            className="h-7 sm:h-8 px-2 text-xs text-muted-foreground hover:text-foreground"
+            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground sm:h-8"
           >
             <RefreshCw className={cn("h-3.5 w-3.5 mr-1", isBusy && "animate-spin")} />
             <span className="hidden sm:inline">Refresh</span>
@@ -112,13 +112,13 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
       </div>
 
       {/* Scrollable Cards */}
-      <div className="relative -mx-3 px-3 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6">
-        {/* Left scroll button */}
+        <div className="relative -mx-4 px-4 sm:-mx-6 sm:px-6">
+          {/* Left scroll button */}
         <Button
           variant="outline"
           size="icon"
           className={cn(
-            "absolute left-1 sm:left-2 lg:left-4 top-1/2 z-10 h-7 w-7 sm:h-8 sm:w-8 -translate-y-1/2 rounded-full bg-background shadow-md transition-opacity hidden sm:flex",
+            "absolute left-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-background/80 shadow-md transition-opacity sm:left-2 sm:flex sm:h-8 sm:w-8",
             canScrollLeft ? "opacity-100" : "pointer-events-none opacity-0",
           )}
           onClick={() => scroll("left")}
@@ -130,12 +130,12 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
         {/* Left fade gradient */}
         <div
           className={cn(
-            "pointer-events-none absolute left-0 top-0 z-[5] h-full w-6 sm:w-8 bg-gradient-to-r from-background to-transparent transition-opacity",
+            "pointer-events-none absolute left-0 top-0 z-[5] h-full w-6 bg-gradient-to-r from-card to-transparent transition-opacity sm:w-8",
             canScrollLeft ? "opacity-100" : "opacity-0",
           )}
         />
 
-        <div ref={scrollRef} className="scrollbar-hide flex gap-2 sm:gap-3 overflow-x-auto pb-2">
+        <div ref={scrollRef} className="scrollbar-hide flex gap-2 overflow-x-auto pb-2 sm:gap-3">
           {isLoading && (
             <>
               {Array.from({ length: 5 }).map((_, i) => (
@@ -170,7 +170,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
         {/* Right fade gradient */}
         <div
           className={cn(
-            "pointer-events-none absolute right-0 top-0 z-[5] h-full w-6 sm:w-8 bg-gradient-to-l from-background to-transparent transition-opacity",
+            "pointer-events-none absolute right-0 top-0 z-[5] h-full w-6 bg-gradient-to-l from-card to-transparent transition-opacity sm:w-8",
             canScrollRight ? "opacity-100" : "opacity-0",
           )}
         />
@@ -180,7 +180,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
           variant="outline"
           size="icon"
           className={cn(
-            "absolute right-1 sm:right-2 lg:right-4 top-1/2 z-10 h-7 w-7 sm:h-8 sm:w-8 -translate-y-1/2 rounded-full bg-background shadow-md transition-opacity hidden sm:flex",
+            "absolute right-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-background/80 shadow-md transition-opacity sm:right-2 sm:flex sm:h-8 sm:w-8",
             canScrollRight ? "opacity-100" : "pointer-events-none opacity-0",
           )}
           onClick={() => scroll("right")}

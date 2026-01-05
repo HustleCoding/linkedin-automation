@@ -1,14 +1,18 @@
-import type React from "react";
-import type { Metadata } from "next";
-import { Inter, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
-import "./globals.css";
+import type React from "react"
+import type { Metadata } from "next"
+import { Space_Grotesk, JetBrains_Mono } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import "./globals.css"
 
-const _inter = Inter({
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-inter",
-});
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+  variable: "--font-body",
+})
+
+const jetBrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-code",
+})
 
 export const metadata: Metadata = {
   title: "LinkAgent AI - Content Lab",
@@ -31,19 +35,19 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-};
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
+      <body className={`${spaceGrotesk.variable} ${jetBrainsMono.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>
     </html>
-  );
+  )
 }

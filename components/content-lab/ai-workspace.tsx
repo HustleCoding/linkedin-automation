@@ -22,7 +22,7 @@ export function AIWorkspace({
   onImageGeneratingChange,
 }: AIWorkspaceProps) {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 lg:flex-row lg:gap-6 lg:p-6 overflow-hidden min-w-0">
+    <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur lg:flex-row lg:gap-6 lg:p-6">
       {/* Editor Panel */}
       <div className="w-full min-w-0 lg:flex-1">
         <PostEditor

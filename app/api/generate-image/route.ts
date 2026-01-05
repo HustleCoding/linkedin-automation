@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const result = await experimental_generateImage({
       model: "bfl/flux-pro-1.1",
       prompt: `Professional LinkedIn post image. Style: ${styleGuide[style]}. Context: ${content.slice(0, 500)}. Requirements: No text or words, no faces, clean modern aesthetic, suitable for business networking, square format.`,
-      size: "1024x1024",
+      aspectRatio: "1:1",
     })
 
     // Extract image from the response
