@@ -12,6 +12,8 @@ export async function POST(request: Request) {
     error: authError,
   } = await supabase.auth.getUser()
 
+  console.log("[v0] Publish route - user:", user?.id, "authError:", authError?.message)
+
   if (authError || !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
@@ -21,7 +23,9 @@ export async function POST(request: Request) {
     .from("linkedin_connections")
     .select("access_token, linkedin_user_id, expires_at")
     .eq("user_id", user.id)
-    .single()
+    .maybeSingle()
+
+  console.log("[v0] LinkedIn connection:", connection ? "found" : "not found", "error:", connectionError?.message)
 
   if (connectionError || !connection) {
     return NextResponse.json(
@@ -31,7 +35,10 @@ export async function POST(request: Request) {
   }
 
   // Check if token is expired
-  if (new Date(connection.expires_at) < new Date()) {
+  const tokenExpired = new Date(connection.expires_at) < new Date()
+  console.log("[v0] Token expires at:", connection.expires_at, "expired:", tokenExpired)
+
+  if (tokenExpired) {
     return NextResponse.json(
       { error: "LinkedIn token expired. Please reconnect your account in Settings." },
       { status: 401 },
@@ -39,6 +46,7 @@ export async function POST(request: Request) {
   }
 
   const { draftId, content, imageUrl, scheduleDate } = await request.json()
+  console.log("[v0] Post content length:", content?.length, "hasImage:", !!imageUrl, "scheduleDate:", scheduleDate)
 
   if (!content?.trim()) {
     return NextResponse.json({ error: "Content is required" }, { status: 400 })

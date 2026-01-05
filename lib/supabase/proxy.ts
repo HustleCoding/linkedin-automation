@@ -57,21 +57,14 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && isProtectedRoute && !pathname.startsWith("/onboarding")) {
-    try {
-      const { data: preferences } = await supabase
-        .from("user_preferences")
-        .select("onboarding_completed")
-        .eq("user_id", user.id)
-        .single()
+    const { data: preferences, error } = await supabase
+      .from("user_preferences")
+      .select("onboarding_completed")
+      .eq("user_id", user.id)
+      .maybeSingle()
 
-      // Redirect to onboarding if not completed
-      if (!preferences || !preferences.onboarding_completed) {
-        const url = request.nextUrl.clone()
-        url.pathname = "/onboarding"
-        return NextResponse.redirect(url)
-      }
-    } catch {
-      // If table doesn't exist or query fails, redirect to onboarding
+    // Redirect to onboarding if not completed or no preferences exist
+    if (error || !preferences || !preferences.onboarding_completed) {
       const url = request.nextUrl.clone()
       url.pathname = "/onboarding"
       return NextResponse.redirect(url)
