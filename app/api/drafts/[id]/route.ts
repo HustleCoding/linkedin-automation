@@ -1,9 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-const isValidUuid = (value: string) =>
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -41,7 +38,7 @@ export async function PATCH(
   const supabase = await createClient();
   const { id } = params;
 
-  if (!isValidUuid(id)) {
+  if (!id || id === "undefined" || id === "null") {
     return NextResponse.json({ error: "Invalid draft id" }, { status: 400 });
   }
 
@@ -79,12 +76,13 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  let query = supabase.from("drafts").update(updates).eq("id", id);
-  if (user.id && isValidUuid(user.id)) {
-    query = query.eq("user_id", user.id);
-  }
-
-  const { data, error } = await query.select().single();
+  const { data, error } = await supabase
+    .from("drafts")
+    .update(updates)
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .select()
+    .single();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
