@@ -1,6 +1,6 @@
 "use client"
 
-import useSWR from "swr"
+import useSWRImmutable from "swr/immutable"
 import type { Trend, Niche } from "@/lib/types/trends"
 
 interface TrendsResponse {
@@ -22,14 +22,9 @@ const fetcher = async (url: string, niche: Niche): Promise<TrendsResponse> => {
 }
 
 export function useTrends(niche: Niche) {
-  const { data, error, isLoading, mutate } = useSWR<TrendsResponse>(
+  const { data, error, isLoading, mutate } = useSWRImmutable<TrendsResponse>(
     ["/api/trends", niche],
     ([url, niche]) => fetcher(url, niche),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 300000, // 5 minutes
-    },
   )
 
   return {

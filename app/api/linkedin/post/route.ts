@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
   if (connectionError || !connection) {
     return NextResponse.json(
-      { error: "LinkedIn not connected. Please connect your account in Settings." },
+      { error: "LinkedIn not connected. Please connect your account in Settings.", needsReconnect: true },
       { status: 400 },
     )
   }
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   // Check if token is expired
   if (new Date(connection.expires_at) < new Date()) {
     return NextResponse.json(
-      { error: "LinkedIn token expired. Please reconnect your account in Settings." },
+      { error: "LinkedIn token expired. Please reconnect your account in Settings.", needsReconnect: true },
       { status: 401 },
     )
   }
@@ -137,6 +137,7 @@ export async function POST(request: Request) {
     if (!postResponse.ok) {
       console.error("LinkedIn post failed:", postResult)
       const errorMessage = postResult.message || "Failed to publish to LinkedIn"
+      const isRevokedToken = postResult.code === "REVOKED_ACCESS_TOKEN" || postResult.serviceErrorCode === 65601
 
       // Update draft with error if we have a draftId
       if (draftId) {
@@ -147,6 +148,17 @@ export async function POST(request: Request) {
           })
           .eq("id", draftId)
           .eq("user_id", user.id)
+      }
+
+      if (isRevokedToken) {
+        await supabase.from("linkedin_connections").delete().eq("user_id", user.id)
+        return NextResponse.json(
+          {
+            error: "LinkedIn access was revoked. Please reconnect your account in Settings.",
+            needsReconnect: true,
+          },
+          { status: 401 },
+        )
       }
 
       return NextResponse.json({ error: errorMessage }, { status: 400 })

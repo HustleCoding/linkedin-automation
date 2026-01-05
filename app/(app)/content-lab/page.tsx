@@ -10,6 +10,7 @@ import { DraftsPanel } from "@/components/content-lab/drafts-panel"
 import { createBrowserClient } from "@/lib/supabase/client"
 import { useDrafts } from "@/hooks/use-drafts"
 import type { Tone } from "@/lib/types/draft"
+import type { Trend } from "@/lib/types/trends"
 
 export interface EditorState {
   content: string
@@ -84,9 +85,37 @@ function ContentLabContent() {
     router.push("/content-lab")
   }
 
-  const handleDraftFromTrend = (generatedContent: string) => {
-    setEditorState((prev) => ({ ...prev, content: generatedContent }))
-    setCurrentDraftId(null)
+  const handleDraftFromTrend = async (trend: Trend) => {
+    const tone = editorState.tone
+
+    setEditorState((prev) => ({ ...prev, isGenerating: true }))
+
+    try {
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "draft",
+          tone,
+          trend,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to generate draft")
+      }
+
+      const data = await response.json()
+      setEditorState((prev) => ({
+        ...prev,
+        content: data.content || "",
+        isGenerating: false,
+      }))
+      setCurrentDraftId(null)
+    } catch (error) {
+      console.error("Failed to generate draft:", error)
+      setEditorState((prev) => ({ ...prev, isGenerating: false }))
+    }
   }
 
   const handleLoadDraft = (draft: {
@@ -135,7 +164,7 @@ function ContentLabContent() {
           </div>
 
           {/* Trend Discovery */}
-          <TrendDiscovery onDraftFromTrend={handleDraftFromTrend} tone={editorState.tone} />
+          <TrendDiscovery onDraftPost={handleDraftFromTrend} isGenerating={editorState.isGenerating} />
 
           {/* AI Workspace - Pass editorState and handler functions */}
           <AIWorkspace
@@ -159,7 +188,7 @@ function ContentLabContent() {
         currentDraftId={currentDraftId}
         onScheduledDateChange={setScheduledDate}
         onScheduledTimeChange={setScheduledTime}
-        onDraftSaved={(id) => setCurrentDraftId(id)}
+        onDraftIdChange={(id) => setCurrentDraftId(id)}
         onPublished={() => {
           handleNewPost()
         }}

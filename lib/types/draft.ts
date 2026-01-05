@@ -1,3 +1,5 @@
+export type Tone = "professional" | "conversational" | "inspirational" | "educational"
+
 export interface Draft {
   id: string
   user_id: string

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -34,6 +35,7 @@ export function SchedulingBar({
   onScheduledDateChange,
   onScheduledTimeChange,
 }: SchedulingBarProps) {
+  const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
   const { createDraft, updateDraft, refresh } = useDrafts()
@@ -149,6 +151,20 @@ export function SchedulingBar({
       const result = await response.json()
 
       if (!response.ok) {
+        if (result.needsReconnect) {
+          toast({
+            title: "LinkedIn connection required",
+            description: result.error || "Please reconnect your LinkedIn account to publish.",
+            variant: "destructive",
+            action: (
+              <Button variant="outline" size="sm" onClick={() => router.push("/settings")}>
+                Reconnect
+              </Button>
+            ),
+          })
+          return
+        }
+
         throw new Error(result.error || "Failed to schedule")
       }
 
@@ -209,6 +225,20 @@ export function SchedulingBar({
       const result = await response.json()
 
       if (!response.ok) {
+        if (result.needsReconnect) {
+          toast({
+            title: "LinkedIn connection required",
+            description: result.error || "Please reconnect your LinkedIn account to publish.",
+            variant: "destructive",
+            action: (
+              <Button variant="outline" size="sm" onClick={() => router.push("/settings")}>
+                Reconnect
+              </Button>
+            ),
+          })
+          return
+        }
+
         throw new Error(result.error || "Failed to publish")
       }
 
