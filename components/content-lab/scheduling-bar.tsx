@@ -146,34 +146,7 @@ export function SchedulingBar({
 
     setIsPublishing(true);
     try {
-      // First save the draft to get an ID
-      let draftId = normalizeDraftId(currentDraftId);
-      if (!draftId) {
-        const draft = await createDraft({
-          content,
-          tone,
-          image_url: imageUrl,
-          status: "draft",
-        });
-        if (draft) {
-          draftId = draft.id;
-          onDraftIdChange(draft.id);
-        }
-      }
-
-      if (!draftId) {
-        throw new Error("Unable to create a draft for scheduling");
-      }
-
-      const updatedDraft = await updateDraft({
-        id: draftId,
-        content,
-        tone,
-        image_url: imageUrl,
-      });
-      if (!updatedDraft) {
-        throw new Error("Failed to update draft before scheduling");
-      }
+      const draftId = normalizeDraftId(currentDraftId);
 
       const [hour, minute] = scheduledTime
         .split(":")
@@ -200,6 +173,7 @@ export function SchedulingBar({
         body: JSON.stringify({
           draftId,
           content,
+          tone,
           imageUrl,
           scheduleDate: scheduleDateTime,
         }),
@@ -229,6 +203,10 @@ export function SchedulingBar({
         }
 
         throw new Error(result.error || "Failed to schedule");
+      }
+
+      if (result.draftId) {
+        onDraftIdChange(result.draftId);
       }
 
       refresh();

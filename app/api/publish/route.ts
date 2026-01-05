@@ -66,7 +66,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { draftId, content, imageUrl, scheduleDate } = await request.json();
+  const { draftId, content, tone, imageUrl, scheduleDate } =
+    await request.json();
   console.log(
     "[v0] Post content length:",
     content?.length,
@@ -83,21 +84,52 @@ export async function POST(request: Request) {
   // Note: LinkedIn API doesn't support native scheduling
   // For MVP, we'll post immediately and inform user about scheduling limitation
   if (scheduleDate) {
-    // Store as scheduled draft - actual posting will need a cron job
+    const scheduledPayload = {
+      content,
+      tone: tone || "professional",
+      image_url: imageUrl || null,
+      status: "scheduled",
+      scheduled_at: scheduleDate,
+    };
+
     if (draftId) {
-      await supabase
+      const { data, error } = await supabase
         .from("drafts")
-        .update({
-          status: "scheduled",
-          scheduled_at: scheduleDate,
-        })
+        .update(scheduledPayload)
         .eq("id", draftId)
-        .eq("user_id", user.id);
+        .eq("user_id", user.id)
+        .select("id")
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        scheduled: true,
+        draftId: data?.id ?? draftId,
+        message: "Post scheduled. It will be published at the scheduled time.",
+      });
+    }
+
+    const { data, error } = await supabase
+      .from("drafts")
+      .insert({
+        user_id: user.id,
+        ...scheduledPayload,
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     return NextResponse.json({
       success: true,
       scheduled: true,
+      draftId: data?.id ?? null,
       message: "Post scheduled. It will be published at the scheduled time.",
     });
   }
