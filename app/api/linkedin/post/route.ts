@@ -162,7 +162,7 @@ export async function POST(request: Request) {
         await supabase
           .from("drafts")
           .update({
-            ayrshare_error: errorMessage,
+            linkedin_error: errorMessage,
           })
           .eq("id", draftId)
           .eq("user_id", user.id)
@@ -193,9 +193,9 @@ export async function POST(request: Request) {
         .from("drafts")
         .update({
           status: "published",
-          ayrshare_post_id: postId,
+          linkedin_post_id: postId,
           published_at: new Date().toISOString(),
-          ayrshare_error: null,
+          linkedin_error: null,
         })
         .eq("id", draftId)
         .eq("user_id", user.id)

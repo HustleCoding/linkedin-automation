@@ -12,9 +12,9 @@ export interface Draft {
   trend_title: string | null
   created_at: string
   updated_at: string
-  ayrshare_post_id: string | null
+  linkedin_post_id: string | null
   published_at: string | null
-  ayrshare_error: string | null
+  linkedin_error: string | null
 }
 
 export interface CreateDraftInput {
@@ -29,27 +29,7 @@ export interface CreateDraftInput {
 
 export interface UpdateDraftInput extends Partial<CreateDraftInput> {
   id: string
-  ayrshare_post_id?: string | null
+  linkedin_post_id?: string | null
   published_at?: string | null
-  ayrshare_error?: string | null
-}
-
-export interface AyrsharePostResponse {
-  status: "success" | "error"
-  id?: string
-  postIds?: Array<{
-    platform: string
-    postId: string
-    postUrl: string
-    status: string
-  }>
-  errors?: Array<{
-    platform: string
-    message: string
-  }>
-  message?: string
-}
-
-export interface AyrshareScheduleResponse extends AyrsharePostResponse {
-  scheduleDate?: string
+  linkedin_error?: string | null
 }

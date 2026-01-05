@@ -37,7 +37,7 @@ interface PublishedPost {
   tone: string
   image_url: string | null
   published_at: string
-  ayrshare_post_id: string
+  linkedin_post_id: string
   analytics: PostAnalytics | null
 }
 
@@ -194,7 +194,7 @@ function AnalyticsContent() {
                               Has image
                             </Badge>
                           )}
-                          {post.ayrshare_post_id && (
+                          {post.linkedin_post_id && (
                             <Badge variant="default" className="text-xs bg-[#0A66C2]">
                               Posted to LinkedIn
                             </Badge>

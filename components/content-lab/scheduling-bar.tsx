@@ -173,7 +173,7 @@ export function SchedulingBar({
         0,
       ).toISOString()
 
-      // Call Ayrshare API to schedule
+      // Call publish API to schedule
       const response = await fetch("/api/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -248,7 +248,7 @@ export function SchedulingBar({
         }
       }
 
-      // Call Ayrshare API to post immediately
+      // Call publish API to post immediately
       const response = await fetch("/api/publish", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

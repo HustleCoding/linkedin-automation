@@ -67,10 +67,11 @@ export async function PATCH(
   if ("status" in body) setUpdate("status", body.status);
   if ("trend_tag" in body) setUpdate("trend_tag", body.trend_tag);
   if ("trend_title" in body) setUpdate("trend_title", body.trend_title);
-  if ("ayrshare_post_id" in body)
-    setUpdate("ayrshare_post_id", body.ayrshare_post_id);
+  if ("linkedin_post_id" in body)
+    setUpdate("linkedin_post_id", body.linkedin_post_id);
   if ("published_at" in body) setUpdate("published_at", body.published_at);
-  if ("ayrshare_error" in body) setUpdate("ayrshare_error", body.ayrshare_error);
+  if ("linkedin_error" in body)
+    setUpdate("linkedin_error", body.linkedin_error);
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
