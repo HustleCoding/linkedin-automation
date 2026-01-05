@@ -41,6 +41,18 @@ export function SchedulingBar({
   const { createDraft, updateDraft, refresh } = useDrafts()
   const { toast } = useToast()
 
+  const parseJsonSafely = async (response: Response) => {
+    const text = await response.text()
+    if (!text) {
+      return {}
+    }
+    try {
+      return JSON.parse(text)
+    } catch {
+      return {}
+    }
+  }
+
   const timeSlots = Array.from({ length: 24 }, (_, i) => {
     const hour = i.toString().padStart(2, "0")
     return [`${hour}:00`, `${hour}:30`]
@@ -148,7 +160,7 @@ export function SchedulingBar({
         }),
       })
 
-      const result = await response.json()
+      const result = await parseJsonSafely(response)
 
       if (!response.ok) {
         if (result.needsReconnect) {
@@ -222,7 +234,7 @@ export function SchedulingBar({
         }),
       })
 
-      const result = await response.json()
+      const result = await parseJsonSafely(response)
 
       if (!response.ok) {
         if (result.needsReconnect) {
