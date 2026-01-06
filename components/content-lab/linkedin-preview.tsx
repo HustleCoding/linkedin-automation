@@ -3,9 +3,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Smartphone, Globe, ThumbsUp, MessageCircle, Repeat2, Send, MoreHorizontal } from "lucide-react"
-import { SparkleLoader } from "./sparkle-loader"
+import { Smartphone, Globe, ThumbsUp, MessageCircle, Repeat2, Send, MoreHorizontal, Loader2 } from "lucide-react"
 import { useState } from "react"
+import { useDisplayName } from "@/hooks/use-display-name"
 
 interface LinkedInPreviewProps {
   content: string
@@ -15,9 +15,21 @@ interface LinkedInPreviewProps {
 
 export function LinkedInPreview({ content, isGenerating, postImage }: LinkedInPreviewProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const displayName = useDisplayName()
 
   const shouldTruncate = content.length > 300
   const displayContent = shouldTruncate && !isExpanded ? content.substring(0, 300) : content
+  const displayLabel = displayName || "John Doe"
+
+  const getInitials = (value: string) => {
+    if (!value) return "JD"
+    const parts = value.split(/[\s._-]+/).filter(Boolean)
+    return parts
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2)
+  }
 
   const formatContent = (text: string) => {
     return text
@@ -49,7 +61,7 @@ export function LinkedInPreview({ content, isGenerating, postImage }: LinkedInPr
       </CardHeader>
       <CardContent className="px-3 sm:px-6">
         <div className="mx-auto w-full max-w-[280px] sm:max-w-[300px]">
-          <div className="rounded-[2rem] sm:rounded-[2.5rem] border-[3px] border-foreground/10 bg-foreground/5 p-1 sm:p-1.5 shadow-xl">
+          <div className="rounded-[2rem] sm:rounded-[2.5rem] border-[2px] border-foreground/10 bg-muted/40 p-1 sm:p-1.5 shadow-md">
             <div className="rounded-[1.5rem] sm:rounded-[2rem] bg-card overflow-hidden">
               {/* Dynamic Island */}
               <div className="flex items-center justify-center py-1.5 sm:py-2 bg-card">
@@ -61,7 +73,7 @@ export function LinkedInPreview({ content, isGenerating, postImage }: LinkedInPr
                 {isGenerating ? (
                   <div className="flex h-[350px] sm:h-[400px] items-center justify-center">
                     <div className="flex flex-col items-center gap-3">
-                      <SparkleLoader />
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Updating preview...</span>
                     </div>
                   </div>
@@ -71,12 +83,12 @@ export function LinkedInPreview({ content, isGenerating, postImage }: LinkedInPr
                     <div className="flex items-start justify-between">
                       <div className="flex gap-2">
                         <Avatar className="h-9 w-9 sm:h-11 sm:w-11 ring-2 ring-background flex-shrink-0">
-                          <AvatarImage src="/placeholder.svg?height=44&width=44" alt="User" />
-                          <AvatarFallback className="text-xs">JD</AvatarFallback>
+                          <AvatarImage src="/placeholder.svg?height=44&width=44" alt={displayLabel} />
+                          <AvatarFallback className="text-xs">{getInitials(displayLabel)}</AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                            <p className="text-xs sm:text-sm font-semibold text-foreground">John Doe</p>
+                            <p className="text-xs sm:text-sm font-semibold text-foreground">{displayLabel}</p>
                             <span className="text-muted-foreground hidden sm:inline">•</span>
                             <button className="text-[10px] sm:text-xs font-semibold text-primary hover:underline">
                               Follow

@@ -7,8 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Sparkles, Lightbulb, Italic, List, Link2, ImagePlus, X, Palette, Loader2 } from "lucide-react"
-import { SparkleLoader } from "./sparkle-loader"
+import { PenLine, Lightbulb, Italic, List, Link2, ImagePlus, X, Palette, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface PostEditorProps {
@@ -144,22 +143,22 @@ export function PostEditor({
       <CardHeader className="pb-3">
         <div className="flex flex-col gap-3">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI Post Editor
+            <PenLine className="h-5 w-5 text-primary" />
+            Post Editor
           </CardTitle>
           <div className="overflow-hidden">
             <ToggleGroup
               type="single"
               value={tone}
               onValueChange={(value) => value && onToneChange(value)}
-              className="flex flex-wrap gap-1"
+              className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-fit sm:flex-wrap sm:gap-1"
             >
               {tones.map((t) => (
                 <ToggleGroupItem
                   key={t.value}
                   value={t.value}
                   size="sm"
-                  className="whitespace-nowrap px-3 text-xs data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+                  className="w-full justify-center text-xs text-center whitespace-normal rounded-md first:rounded-md last:rounded-md data-[state=on]:bg-primary data-[state=on]:text-primary-foreground sm:w-auto sm:whitespace-nowrap sm:rounded-none sm:first:rounded-l-md sm:last:rounded-r-md sm:px-3"
                 >
                   {t.label}
                 </ToggleGroupItem>
@@ -170,71 +169,70 @@ export function PostEditor({
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddHook}
-            disabled={isGenerating}
-            className="gap-1.5 bg-primary/5 border-primary/20 text-primary hover:bg-primary/10 hover:text-primary"
-          >
-            {isGenerating ? <SparkleLoader size="sm" /> : <Lightbulb className="h-4 w-4" />}
-            Add Hook
-          </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleAddHook}
+              disabled={isGenerating}
+              className="w-full gap-1.5 sm:w-auto"
+            >
+              {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
+              Add Hook
+            </Button>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!content.trim() || isGeneratingImage}
-                className="gap-1.5 bg-transparent"
-              >
-                {isGeneratingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
-                Add Image
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              {imageStyles.map((style) => (
-                <DropdownMenuItem
-                  key={style.value}
-                  onClick={() => handleGenerateImage(style.value)}
-                  className="flex flex-col items-start gap-0.5"
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!content.trim() || isGeneratingImage}
+                  className="w-full gap-1.5 bg-transparent sm:w-auto"
                 >
-                  <span className="font-medium">{style.label}</span>
-                  <span className="text-xs text-muted-foreground">{style.description}</span>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  {isGeneratingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImagePlus className="h-4 w-4" />}
+                  Add Image
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-48">
+                {imageStyles.map((style) => (
+                  <DropdownMenuItem
+                    key={style.value}
+                    onClick={() => handleGenerateImage(style.value)}
+                    className="flex flex-col items-start gap-0.5"
+                  >
+                    <span className="font-medium">{style.label}</span>
+                    <span className="text-xs text-muted-foreground">{style.description}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
-          <div className="h-4 w-px bg-border" />
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-muted active:bg-muted/80"
-            onClick={() => formatText("italic")}
-            aria-label="Italic"
-          >
-            <Italic className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-muted active:bg-muted/80"
-            onClick={() => formatText("list")}
-            aria-label="List"
-          >
-            <List className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 hover:bg-muted active:bg-muted/80"
-            aria-label="Add link"
-          >
-            <Link2 className="h-4 w-4" />
-          </Button>
+          <div className="hidden h-4 w-px bg-border sm:block" />
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="hover:bg-muted active:bg-muted/80"
+              onClick={() => formatText("italic")}
+              aria-label="Italic"
+            >
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="hover:bg-muted active:bg-muted/80"
+              onClick={() => formatText("list")}
+              aria-label="List"
+            >
+              <List className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="icon-sm" className="hover:bg-muted active:bg-muted/80" aria-label="Add link">
+              <Link2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
 
         {(postImage || isGeneratingImage) && (
@@ -280,13 +278,13 @@ export function PostEditor({
             value={content}
             onChange={(e) => onContentChange(e.target.value)}
             placeholder="Write your LinkedIn post here... Share insights, tell a story, or start a conversation."
-            className="min-h-[280px] resize-none text-base leading-relaxed lg:min-h-[360px]"
+            className="min-h-[220px] resize-none text-base leading-relaxed sm:min-h-[280px] lg:min-h-[360px]"
             maxLength={MAX_CHARS}
           />
           {isGenerating && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
+            <div className="absolute inset-0 flex items-center justify-center bg-background/90 rounded-lg">
               <div className="flex flex-col items-center gap-2">
-                <SparkleLoader />
+                <Loader2 className="h-6 w-6 animate-spin text-primary" />
                 <span className="text-sm text-muted-foreground">Generating content...</span>
               </div>
             </div>

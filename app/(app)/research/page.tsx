@@ -153,9 +153,9 @@ function ResearchContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="relative flex min-h-screen bg-background">
       <Sidebar />
-      <main className="lg:pl-64">
+      <main className="relative flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-10 md:ml-64 md:pt-0">
         <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8 pb-24 lg:pb-8">
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Research</h1>
@@ -164,13 +164,13 @@ function ResearchContent() {
             </p>
           </div>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="topic" className="gap-2">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 min-w-0">
+            <TabsList className="grid w-full max-w-md grid-cols-1 gap-1 h-auto sm:grid-cols-2 sm:h-9">
+              <TabsTrigger value="topic" className="gap-2 whitespace-normal text-center sm:whitespace-nowrap">
                 <BookOpen className="h-4 w-4" />
                 Topic Research
               </TabsTrigger>
-              <TabsTrigger value="competitor" className="gap-2">
+              <TabsTrigger value="competitor" className="gap-2 whitespace-normal text-center sm:whitespace-nowrap">
                 <UserSearch className="h-4 w-4" />
                 Competitor Analysis
               </TabsTrigger>
@@ -193,7 +193,7 @@ function ResearchContent() {
                     <Button
                       onClick={handleTopicResearch}
                       disabled={isResearching || !topicQuery.trim()}
-                      className="gap-2 bg-primary hover:bg-primary/90"
+                      className="w-full gap-2 bg-primary hover:bg-primary/90 sm:w-auto"
                     >
                       {isResearching ? (
                         <>
@@ -238,13 +238,15 @@ function ResearchContent() {
                             setResearchResult(item.result as ResearchResult)
                             setTopicQuery(item.query)
                           }}
-                          className="flex w-full items-center justify-between rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
+                          className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
                         >
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-foreground">{item.query}</p>
-                            <p className="text-xs text-muted-foreground">{formatHistoryTimestamp(item.created_at)}</p>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <p className="text-sm font-medium text-foreground truncate">{item.query}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {formatHistoryTimestamp(item.created_at)}
+                            </p>
                           </div>
-                          <span className="text-xs font-medium text-primary">View</span>
+                          <span className="text-xs font-medium text-primary shrink-0">View</span>
                         </button>
                       ))}
                     </div>
@@ -279,7 +281,7 @@ function ResearchContent() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line break-words">
                         {researchResult.overview}
                       </p>
                     </CardContent>
@@ -296,13 +298,13 @@ function ResearchContent() {
                       <CardContent className="space-y-4">
                         {researchResult.keyInsights.map((insight, i) => (
                           <div key={i} className="space-y-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-foreground">{insight.title}</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-medium text-foreground break-words">{insight.title}</span>
                               <Badge variant="outline" className={relevanceColor(insight.relevance)}>
                                 {insight.relevance}
                               </Badge>
                             </div>
-                            <p className="text-sm text-muted-foreground">{insight.description}</p>
+                            <p className="text-sm text-muted-foreground break-words">{insight.description}</p>
                           </div>
                         ))}
                       </CardContent>
@@ -326,7 +328,11 @@ function ResearchContent() {
                           <p className="text-sm font-medium text-foreground mb-2">Pain Points</p>
                           <div className="flex flex-wrap gap-2">
                             {researchResult.audienceInsights.painPoints.map((point, i) => (
-                              <Badge key={i} variant="outline" className="bg-red-500/10 text-red-600 border-red-500/20">
+                              <Badge
+                                key={i}
+                                variant="outline"
+                                className="bg-red-500/10 text-red-600 border-red-500/20 max-w-full whitespace-normal"
+                              >
                                 {point}
                               </Badge>
                             ))}
@@ -339,7 +345,7 @@ function ResearchContent() {
                               <Badge
                                 key={i}
                                 variant="outline"
-                                className="bg-green-500/10 text-green-600 border-green-500/20"
+                                className="bg-green-500/10 text-green-600 border-green-500/20 max-w-full whitespace-normal"
                               >
                                 {motivation}
                               </Badge>
@@ -370,8 +376,8 @@ function ResearchContent() {
                                   {angle.format}
                                 </Badge>
                               </div>
-                              <p className="font-medium text-foreground mb-2">{angle.angle}</p>
-                              <p className="text-sm text-muted-foreground italic mb-3">"{angle.hook}"</p>
+                              <p className="font-medium text-foreground mb-2 break-words">{angle.angle}</p>
+                              <p className="text-sm text-muted-foreground italic mb-3 break-words">"{angle.hook}"</p>
                               <Button
                                 size="sm"
                                 variant="ghost"
@@ -435,7 +441,7 @@ function ResearchContent() {
                           {researchResult.trendingQuestions.map((question, i) => (
                             <li key={i} className="flex items-start gap-2">
                               <span className="text-primary font-medium">Q:</span>
-                              <span className="text-muted-foreground">{question}</span>
+                              <span className="text-muted-foreground break-words">{question}</span>
                             </li>
                           ))}
                         </ul>
@@ -475,7 +481,7 @@ function ResearchContent() {
                     <Button
                       onClick={handleCompetitorAnalysis}
                       disabled={isAnalyzing || !competitorQuery.trim()}
-                      className="gap-2 bg-primary hover:bg-primary/90"
+                      className="w-full gap-2 bg-primary hover:bg-primary/90 sm:w-auto"
                     >
                       {isAnalyzing ? (
                         <>
@@ -520,13 +526,15 @@ function ResearchContent() {
                             setCompetitorResult(item.result as CompetitorAnalysis)
                             setCompetitorQuery(item.query)
                           }}
-                          className="flex w-full items-center justify-between rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
+                          className="flex w-full min-w-0 items-center justify-between gap-3 rounded-lg border bg-card px-3 py-2 text-left transition-colors hover:border-primary/50"
                         >
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium text-foreground">{item.query}</p>
-                            <p className="text-xs text-muted-foreground">{formatHistoryTimestamp(item.created_at)}</p>
+                          <div className="min-w-0 flex-1 space-y-1">
+                            <p className="text-sm font-medium text-foreground truncate">{item.query}</p>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {formatHistoryTimestamp(item.created_at)}
+                            </p>
                           </div>
-                          <span className="text-xs font-medium text-primary">View</span>
+                          <span className="text-xs font-medium text-primary shrink-0">View</span>
                         </button>
                       ))}
                     </div>
@@ -568,13 +576,21 @@ function ResearchContent() {
                             .map((n) => n[0])
                             .join("")}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-foreground">{competitorResult.profile.name}</h3>
-                          <p className="text-muted-foreground">{competitorResult.profile.headline}</p>
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-xl font-semibold text-foreground break-words">
+                            {competitorResult.profile.name}
+                          </h3>
+                          <p className="text-muted-foreground break-words">{competitorResult.profile.headline}</p>
                           <div className="flex flex-wrap gap-3 mt-2">
-                            <Badge variant="secondary">{competitorResult.profile.estimatedFollowers} followers</Badge>
-                            <Badge variant="outline">{competitorResult.profile.niche}</Badge>
-                            <Badge variant="outline">{competitorResult.profile.postingFrequency}</Badge>
+                            <Badge variant="secondary" className="max-w-full whitespace-normal">
+                              {competitorResult.profile.estimatedFollowers} followers
+                            </Badge>
+                            <Badge variant="outline" className="max-w-full whitespace-normal">
+                              {competitorResult.profile.niche}
+                            </Badge>
+                            <Badge variant="outline" className="max-w-full whitespace-normal">
+                              {competitorResult.profile.postingFrequency}
+                            </Badge>
                           </div>
                         </div>
                       </div>
@@ -594,7 +610,7 @@ function ResearchContent() {
                           <p className="text-sm font-medium text-foreground mb-2">Primary Themes</p>
                           <div className="flex flex-wrap gap-2">
                             {competitorResult.contentStrategy.primaryThemes.map((theme, i) => (
-                              <Badge key={i} variant="secondary">
+                              <Badge key={i} variant="secondary" className="max-w-full whitespace-normal">
                                 {theme}
                               </Badge>
                             ))}
@@ -604,7 +620,7 @@ function ResearchContent() {
                           <p className="text-sm font-medium text-foreground mb-2">Content Formats</p>
                           <div className="flex flex-wrap gap-2">
                             {competitorResult.contentStrategy.contentFormats.map((format, i) => (
-                              <Badge key={i} variant="outline">
+                              <Badge key={i} variant="outline" className="max-w-full whitespace-normal">
                                 {format}
                               </Badge>
                             ))}

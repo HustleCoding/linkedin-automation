@@ -11,10 +11,11 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { User, Linkedin, CheckCircle2, XCircle, Loader2, Shield, Bell, Palette } from "lucide-react"
+import { User, Linkedin, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 
 function SettingsContent() {
   const [userEmail, setUserEmail] = useState<string>("")
+  const [displayName, setDisplayName] = useState("")
   const [linkedInStatus, setLinkedInStatus] = useState<{
     connected: boolean
     name: string | null
@@ -37,6 +38,17 @@ function SettingsContent() {
       } = await supabase.auth.getUser()
       if (user?.email) {
         setUserEmail(user.email)
+      }
+      try {
+        const response = await fetch("/api/user/preferences")
+        if (response.ok) {
+          const data = await response.json()
+          if (data?.preferences?.display_name) {
+            setDisplayName(data.preferences.display_name)
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load preferences:", error)
       }
     }
     loadUser()
@@ -64,6 +76,12 @@ function SettingsContent() {
   useEffect(() => {
     checkLinkedInStatus()
   }, [])
+
+  useEffect(() => {
+    if (!displayName && linkedInStatus.name) {
+      setDisplayName(linkedInStatus.name)
+    }
+  }, [displayName, linkedInStatus.name])
 
   // Listen for OAuth popup messages
   useEffect(() => {
@@ -94,15 +112,53 @@ function SettingsContent() {
     return () => window.removeEventListener("message", handleMessage)
   }, [toast])
 
-  const getInitials = (email: string) => {
-    if (!email) return "U"
-    return email
-      .split("@")[0]
-      .split(".")
-      .map((n) => n[0])
+  const getInitials = (value: string) => {
+    if (!value) return "U"
+    const base = value.split("@")[0]
+    const parts = base.split(/[\s._-]+/).filter(Boolean)
+    return parts
+      .map((part) => part[0])
       .join("")
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  const handleSaveProfile = async () => {
+    const trimmedName = displayName.trim()
+    if (!trimmedName) {
+      toast({
+        title: "Display name required",
+        description: "Please enter a display name to save.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      const response = await fetch("/api/user/preferences", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_name: trimmedName }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to save profile")
+      }
+
+      setDisplayName(trimmedName)
+      window.dispatchEvent(new CustomEvent("display-name-updated", { detail: trimmedName }))
+      toast({
+        title: "Profile saved",
+        description: "Your display name has been updated.",
+      })
+    } catch (error) {
+      console.error("Failed to save profile:", error)
+      toast({
+        title: "Save failed",
+        description: "Unable to save your display name. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   const handleConnectLinkedIn = async () => {
@@ -181,11 +237,13 @@ function SettingsContent() {
                 <div className="flex items-center gap-4">
                   <Avatar className="h-16 w-16">
                     <AvatarImage src={linkedInStatus.picture || undefined} alt="Profile" />
-                    <AvatarFallback className="text-lg">{getInitials(userEmail)}</AvatarFallback>
+                    <AvatarFallback className="text-lg">{getInitials(displayName || userEmail)}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium text-foreground">{linkedInStatus.name || userEmail || "Loading..."}</p>
-                    <p className="text-sm text-muted-foreground">Pro Plan</p>
+                    <p className="font-medium text-foreground">
+                      {displayName || linkedInStatus.name || userEmail || "Loading..."}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Free Plan</p>
                   </div>
                 </div>
 
@@ -198,11 +256,18 @@ function SettingsContent() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="name">Display Name</Label>
-                    <Input id="name" placeholder="Enter your name" defaultValue={linkedInStatus.name || ""} />
+                    <Input
+                      id="name"
+                      placeholder="Enter your name"
+                      value={displayName}
+                      onChange={(event) => setDisplayName(event.target.value)}
+                    />
                   </div>
                 </div>
 
-                <Button>Save Changes</Button>
+                <Button onClick={handleSaveProfile} disabled={!displayName.trim()}>
+                  Save Changes
+                </Button>
               </CardContent>
             </Card>
 
@@ -285,81 +350,6 @@ function SettingsContent() {
               </CardContent>
             </Card>
 
-            {/* Notifications Section */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Bell className="h-5 w-5 text-primary" />
-                  <CardTitle>Notifications</CardTitle>
-                </div>
-                <CardDescription>Manage your notification preferences</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Email notifications</p>
-                    <p className="text-sm text-muted-foreground">Receive emails about your scheduled posts</p>
-                  </div>
-                  <Badge variant="outline">Coming Soon</Badge>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Post reminders</p>
-                    <p className="text-sm text-muted-foreground">Get reminded before scheduled posts go live</p>
-                  </div>
-                  <Badge variant="outline">Coming Soon</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Appearance Section */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Palette className="h-5 w-5 text-primary" />
-                  <CardTitle>Appearance</CardTitle>
-                </div>
-                <CardDescription>Customize the look of your dashboard</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Theme</p>
-                    <p className="text-sm text-muted-foreground">Choose between light and dark mode</p>
-                  </div>
-                  <Badge variant="outline">Coming Soon</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Security Section */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  <CardTitle>Security</CardTitle>
-                </div>
-                <CardDescription>Manage your account security</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground">Change password</p>
-                    <p className="text-sm text-muted-foreground">Update your account password</p>
-                  </div>
-                  <Button variant="outline">Update</Button>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-foreground text-destructive">Delete account</p>
-                    <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
-                  </div>
-                  <Button variant="destructive">Delete</Button>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </main>

@@ -87,28 +87,28 @@ function AnalyticsContent() {
       value: draftCount,
       helper: "In your workspace",
       icon: FileText,
-      color: "bg-primary/10 text-primary",
+      color: "bg-muted text-foreground",
     },
     {
       label: "Scheduled",
       value: scheduledCount,
       helper: "Queued to publish",
       icon: Calendar,
-      color: "bg-sky-500/10 text-sky-700",
+      color: "bg-muted text-foreground",
     },
     {
       label: "Published",
       value: publishedCount,
       helper: "Live on LinkedIn",
       icon: TrendingUp,
-      color: "bg-emerald-500/10 text-emerald-700",
+      color: "bg-muted text-foreground",
     },
     {
       label: "With Images",
       value: postsWithImages,
       helper: "Visual posts",
       icon: BarChart3,
-      color: "bg-amber-500/10 text-amber-700",
+      color: "bg-muted text-foreground",
     },
   ]
 
@@ -123,19 +123,12 @@ function AnalyticsContent() {
       <Sidebar />
 
       <main className="relative flex-1 overflow-y-auto pt-16 pb-10 md:ml-64 md:pt-0">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-32 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-32 left-[-7rem] h-96 w-96 rounded-full bg-sky-300/10 blur-3xl" />
-          <div className="absolute bottom-[-10rem] right-1/3 h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
-        </div>
-
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-xl">
-                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
+                <Badge variant="secondary" className="gap-2 bg-muted text-muted-foreground">
                   <Sparkles className="h-3.5 w-3.5" />
                   Performance snapshot
                 </Badge>
@@ -148,7 +141,7 @@ function AnalyticsContent() {
                   onClick={() => {
                     // Placeholder for fetch functions if needed in future
                   }}
-                  className="mt-5 gap-2 bg-background/70"
+                  className="mt-5 gap-2 bg-transparent"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Refresh
@@ -157,7 +150,7 @@ function AnalyticsContent() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {heroHighlights.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                  <div key={item.label} className="rounded-xl border border-border/60 bg-card p-4">
                     <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
                     <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.helper}</p>
@@ -170,7 +163,7 @@ function AnalyticsContent() {
           {/* Content Stats */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((stat) => (
-              <Card key={stat.label} className="border-border/70 bg-card/80 shadow-sm">
+              <Card key={stat.label} className="border-border/60 bg-card">
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${stat.color}`}>
                     <stat.icon className="h-5 w-5" />
@@ -186,7 +179,7 @@ function AnalyticsContent() {
           </div>
 
           {/* Published Posts List */}
-          <Card className="mt-8 border-border/70 bg-card/80 shadow-sm">
+          <Card className="mt-8 border-border/60 bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-lg">
                 <BarChart3 className="h-5 w-5" />
@@ -215,7 +208,7 @@ function AnalyticsContent() {
                   {publishedPosts.map((post) => (
                     <div
                       key={post.id}
-                      className="flex flex-col gap-4 rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90 sm:flex-row"
+                      className="flex flex-col gap-4 rounded-xl border border-border/60 bg-muted/40 p-4 transition-colors hover:border-foreground/20 hover:bg-muted/60 sm:flex-row"
                     >
                       {/* Post Preview */}
                       <div className="flex-1 min-w-0">

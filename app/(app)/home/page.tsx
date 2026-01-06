@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sidebar } from "@/components/layout/sidebar"
 import { useDrafts } from "@/hooks/use-drafts"
+import { useDisplayName } from "@/hooks/use-display-name"
 import { createBrowserClient } from "@/lib/supabase/client"
 import {
   PenLine,
@@ -26,6 +27,7 @@ export default function HomePage() {
   const router = useRouter()
   const { drafts, isLoading } = useDrafts()
   const [user, setUser] = useState<{ email?: string } | null>(null)
+  const displayName = useDisplayName()
 
   useEffect(() => {
     const supabase = createBrowserClient()
@@ -77,28 +79,28 @@ export default function HomePage() {
       title: "New Post",
       description: "Create a new LinkedIn post",
       href: "/content-lab",
-      color: "bg-primary/10 text-primary",
+      color: "bg-muted text-foreground",
     },
     {
       icon: TrendingUp,
       title: "Find Trends",
       description: "Discover trending topics",
       href: "/content-lab",
-      color: "bg-emerald-500/10 text-emerald-600",
+      color: "bg-muted text-foreground",
     },
     {
       icon: Calendar,
       title: "Schedule",
       description: "View your content calendar",
       href: "/schedule",
-      color: "bg-amber-500/10 text-amber-600",
+      color: "bg-muted text-foreground",
     },
     {
       icon: BarChart3,
       title: "Analytics",
       description: "Track your performance",
       href: "/analytics",
-      color: "bg-sky-500/10 text-sky-600",
+      color: "bg-muted text-foreground",
     },
   ]
 
@@ -129,28 +131,28 @@ export default function HomePage() {
       label: "Drafts",
       value: draftCount,
       description: "Ideas in progress",
-      color: "bg-slate-900/5 text-slate-700",
+      color: "bg-muted text-foreground",
     },
     {
       icon: Clock,
       label: "Scheduled",
       value: scheduledCount,
       description: "Next up in queue",
-      color: "bg-sky-500/10 text-sky-700",
+      color: "bg-muted text-foreground",
     },
     {
       icon: Send,
       label: "Published",
       value: publishedCount,
       description: "Shared publicly",
-      color: "bg-emerald-500/10 text-emerald-700",
+      color: "bg-muted text-foreground",
     },
     {
       icon: ImageIcon,
       label: "With Images",
       value: withImageCount,
       description: "Visual posts",
-      color: "bg-amber-500/10 text-amber-700",
+      color: "bg-muted text-foreground",
     },
   ]
 
@@ -181,6 +183,8 @@ export default function HomePage() {
     },
   ]
 
+  const greetingName = displayName || (user?.email ? user.email.split("@")[0] : "")
+
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -194,24 +198,17 @@ export default function HomePage() {
       <Sidebar />
 
       <main className="relative flex-1 overflow-y-auto pt-16 pb-10 md:ml-64 md:pt-0">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-32 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-32 left-[-7rem] h-96 w-96 rounded-full bg-amber-300/15 blur-3xl" />
-          <div className="absolute bottom-[-10rem] right-1/4 h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
-        </div>
-
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Hero */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-xl">
-                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
+                <Badge variant="secondary" className="gap-2 bg-muted text-muted-foreground">
                   <Sparkles className="h-3.5 w-3.5" />
                   Weekly cadence
                 </Badge>
                 <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                  Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}
+                  Welcome back{greetingName ? `, ${greetingName}` : ""}
                 </h1>
                 <p className="mt-2 text-sm text-muted-foreground sm:text-base">
                   Draft, refine, and schedule with a clear view of what ships today and what's next.
@@ -224,7 +221,7 @@ export default function HomePage() {
                     </Button>
                   </Link>
                   <Link href="/content-lab">
-                    <Button variant="outline" className="gap-2 bg-background/60">
+                    <Button variant="outline" className="gap-2 bg-transparent">
                       <TrendingUp className="h-4 w-4" />
                       Explore trends
                     </Button>
@@ -234,7 +231,7 @@ export default function HomePage() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {heroHighlights.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                  <div key={item.label} className="rounded-xl border border-border/60 bg-card p-4">
                     <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
                     <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.helper}</p>
@@ -248,7 +245,7 @@ export default function HomePage() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {quickActions.map((action) => (
               <Link key={action.title} href={action.href}>
-                <Card className="group relative cursor-pointer overflow-hidden border-border/70 bg-card/80 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+                <Card className="group relative cursor-pointer overflow-hidden border-border/60 bg-card transition-colors hover:border-foreground/20">
                   <CardContent className="flex items-center gap-4 p-4">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${action.color}`}>
                       <action.icon className="h-6 w-6" />
@@ -267,7 +264,7 @@ export default function HomePage() {
           {/* Snapshot */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((stat) => (
-              <Card key={stat.label} className="border-border/70 bg-card/80 shadow-sm">
+              <Card key={stat.label} className="border-border/60 bg-card">
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${stat.color}`}>
                     <stat.icon className="h-5 w-5" />
@@ -284,7 +281,7 @@ export default function HomePage() {
 
           {/* Activity */}
           <div className="mt-8 grid gap-6 lg:grid-cols-3">
-            <Card className="border-border/70 bg-card/80 shadow-sm lg:col-span-2">
+            <Card className="border-border/60 bg-card lg:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between pb-4">
                 <div>
                   <CardTitle className="text-lg font-semibold">Recent Drafts</CardTitle>
@@ -314,7 +311,7 @@ export default function HomePage() {
                 ) : (
                   recentDrafts.map((draft) => (
                     <Link key={draft.id} href={`/content-lab?draft=${draft.id}`} className="block">
-                      <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                      <div className="group cursor-pointer rounded-xl border border-border/60 bg-muted/40 p-4 transition-colors hover:border-foreground/20 hover:bg-muted/60">
                         <div className="flex items-start justify-between gap-3">
                           <p className="line-clamp-2 flex-1 text-sm font-medium text-foreground">
                             {draft.content || "Empty draft"}
@@ -343,7 +340,7 @@ export default function HomePage() {
             </Card>
 
             <div className="space-y-6">
-              <Card className="border-border/70 bg-card/80 shadow-sm">
+              <Card className="border-border/60 bg-card">
                 <CardHeader className="flex flex-row items-center justify-between pb-4">
                   <div>
                     <CardTitle className="text-lg font-semibold">Upcoming Posts</CardTitle>
@@ -373,13 +370,13 @@ export default function HomePage() {
                   ) : (
                     upcomingScheduled.map((draft) => (
                       <Link key={draft.id} href={`/content-lab?draft=${draft.id}`} className="block">
-                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-muted/40 p-4 transition-colors hover:border-foreground/20 hover:bg-muted/60">
                           <div className="flex items-start justify-between gap-2">
                             <p className="line-clamp-2 flex-1 text-sm font-medium text-foreground">
                               {draft.content || "Empty draft"}
                             </p>
                             {draft.image_url && (
-                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-foreground">
                                 <ImageIcon className="h-4 w-4" />
                               </div>
                             )}
@@ -394,7 +391,7 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
-              <Card className="border-border/70 bg-card/80 shadow-sm">
+              <Card className="border-border/60 bg-card">
                 <CardHeader>
                   <CardTitle className="text-lg font-semibold">Weekly Rhythm</CardTitle>
                 </CardHeader>
@@ -408,7 +405,7 @@ export default function HomePage() {
                       <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
                     </div>
                   ))}
-                  <div className="rounded-xl border border-border/60 bg-background/70 p-3 text-xs text-muted-foreground">
+                  <div className="rounded-xl border border-border/60 bg-muted/40 p-3 text-xs text-muted-foreground">
                     Keep a steady pace to build audience trust. Scheduling 3-5 posts per week keeps reach consistent.
                   </div>
                 </CardContent>

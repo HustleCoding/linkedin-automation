@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useDrafts } from "@/hooks/use-drafts"
 import { createBrowserClient } from "@/lib/supabase/client"
-import { ChevronLeft, ChevronRight, CalendarIcon, List, ImageIcon, Clock, TrendingUp, Sparkles } from "lucide-react"
+import { ChevronLeft, ChevronRight, CalendarIcon, List, ImageIcon, Clock, TrendingUp } from "lucide-react"
 
 export default function SchedulePage() {
   const router = useRouter()
@@ -105,28 +105,28 @@ export default function SchedulePage() {
       value: scheduledDrafts.length,
       helper: "Total queued",
       icon: CalendarIcon,
-      color: "bg-primary/10 text-primary",
+      color: "bg-muted text-foreground",
     },
     {
       label: "Today",
       value: todayCount,
       helper: "Going live today",
       icon: Clock,
-      color: "bg-emerald-500/10 text-emerald-700",
+      color: "bg-muted text-foreground",
     },
     {
       label: "This Week",
       value: weekCount,
       helper: "Next 7 days",
       icon: TrendingUp,
-      color: "bg-sky-500/10 text-sky-700",
+      color: "bg-muted text-foreground",
     },
     {
       label: "With Images",
       value: withImageCount,
       helper: "Visual posts",
       icon: ImageIcon,
-      color: "bg-amber-500/10 text-amber-700",
+      color: "bg-muted text-foreground",
     },
   ]
 
@@ -148,20 +148,13 @@ export default function SchedulePage() {
       <Sidebar />
 
       <main className="relative flex-1 overflow-y-auto pt-16 pb-10 md:ml-64 md:pt-0">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-28 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-40 left-[-7rem] h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
-          <div className="absolute bottom-[-10rem] right-1/3 h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
-        </div>
-
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-xl">
-                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
+                <Badge variant="secondary" className="gap-2 bg-muted text-muted-foreground">
+                  <CalendarIcon className="h-3.5 w-3.5" />
                   Scheduling overview
                 </Badge>
                 <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">Schedule</h1>
@@ -170,7 +163,7 @@ export default function SchedulePage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border/60 bg-background/70 p-2">
+              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border/60 bg-card p-2">
                 <Button
                   variant={viewMode === "calendar" ? "default" : "ghost"}
                   size="sm"
@@ -194,7 +187,7 @@ export default function SchedulePage() {
           {/* Stats */}
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((stat) => (
-              <Card key={stat.label} className="border-border/70 bg-card/80 shadow-sm">
+              <Card key={stat.label} className="border-border/60 bg-card">
                 <CardContent className="flex items-center gap-4 p-4">
                   <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${stat.color}`}>
                     <stat.icon className="h-5 w-5" />
@@ -210,20 +203,20 @@ export default function SchedulePage() {
           </div>
 
           {viewMode === "calendar" ? (
-            <Card className="mt-8 border-border/70 bg-card/80 shadow-sm">
+            <Card className="mt-8 border-border/60 bg-card">
               <CardHeader className="flex flex-col gap-4 pb-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <CardTitle className="text-lg font-semibold">{monthLabel}</CardTitle>
                   <p className="text-sm text-muted-foreground">See every post scheduled this month.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="bg-background/60" onClick={goToToday}>
+                  <Button variant="outline" size="sm" className="bg-transparent" onClick={goToToday}>
                     Today
                   </Button>
-                  <Button variant="outline" size="icon" className="bg-background/60" onClick={prevMonth}>
+                  <Button variant="outline" size="icon" className="bg-transparent" onClick={prevMonth}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon" className="bg-background/60" onClick={nextMonth}>
+                  <Button variant="outline" size="icon" className="bg-transparent" onClick={nextMonth}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
@@ -257,7 +250,7 @@ export default function SchedulePage() {
                         className={`min-h-[80px] rounded-xl border p-1 transition-colors sm:min-h-[110px] sm:p-2 ${
                           dayIsToday
                             ? "border-primary/40 bg-primary/10"
-                            : "border-border/60 bg-background/60 hover:bg-background/90"
+                            : "border-border/60 bg-card hover:bg-muted/40"
                         }`}
                       >
                         <span
@@ -289,7 +282,7 @@ export default function SchedulePage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="mt-8 border-border/70 bg-card/80 shadow-sm">
+            <Card className="mt-8 border-border/60 bg-card">
               <CardHeader>
                 <CardTitle className="text-lg font-semibold">Scheduled Posts</CardTitle>
                 <p className="text-sm text-muted-foreground">Every post ready to go live.</p>
@@ -313,7 +306,7 @@ export default function SchedulePage() {
                   <div className="space-y-3">
                     {sortedScheduledDrafts.map((draft) => (
                       <Link key={draft.id} href={`/content-lab?draft=${draft.id}`}>
-                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-background/60 p-4 transition-all hover:border-primary/40 hover:bg-background/90">
+                        <div className="group cursor-pointer rounded-xl border border-border/60 bg-muted/40 p-4 transition-colors hover:border-foreground/20 hover:bg-muted/60">
                           <div className="flex items-start justify-between gap-4">
                             <div className="min-w-0 flex-1">
                               <p className="line-clamp-2 text-sm font-medium text-foreground">

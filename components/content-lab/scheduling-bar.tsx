@@ -322,7 +322,7 @@ export function SchedulingBar({
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 lg:left-64">
+    <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60 bg-background lg:left-64">
       <div className="flex flex-col gap-2 px-3 py-3 sm:px-4 sm:flex-row sm:items-center sm:justify-between lg:px-6">
         {/* DateTime Picker */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -334,7 +334,7 @@ export function SchedulingBar({
                 className={cn(
                   "justify-start text-left font-normal h-9 text-xs sm:text-sm",
                   !scheduledDate && "text-muted-foreground",
-                  scheduledDate && "border-primary/30 bg-primary/5"
+                  scheduledDate && "border-foreground/20 bg-muted/50"
                 )}
               >
                 <CalendarIcon className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -355,12 +355,14 @@ export function SchedulingBar({
           <Select value={scheduledTime} onValueChange={onScheduledTimeChange}>
             <SelectTrigger
               className={cn(
-                "w-20 sm:w-24 h-9 text-xs sm:text-sm",
-                scheduledTime && "border-primary/30 bg-primary/5"
+                "w-24 sm:w-28 h-9 gap-3 text-xs sm:text-sm",
+                scheduledTime && "border-foreground/20 bg-muted/50"
               )}
             >
-              <Clock className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-              <SelectValue placeholder="Time" />
+              <span className="flex min-w-0 items-center gap-2">
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+                <SelectValue placeholder="Time" />
+              </span>
             </SelectTrigger>
             <SelectContent>
               {timeSlots.map((slot) => (
@@ -387,11 +389,11 @@ export function SchedulingBar({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 justify-end">
+        <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:items-center sm:justify-end">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="gap-1.5 sm:gap-2 h-9 text-muted-foreground hover:text-foreground text-xs sm:text-sm"
+            className="w-full gap-1.5 h-9 text-xs sm:w-auto sm:gap-2 sm:text-sm"
             onClick={handleSaveDraft}
             disabled={isSaving || isPublishing}
           >
@@ -406,7 +408,7 @@ export function SchedulingBar({
           {hasSchedule ? (
             <Button
               size="sm"
-              className="gap-1.5 sm:gap-2 h-9 bg-[#0A66C2] hover:bg-[#004182] text-xs sm:text-sm"
+              className="w-full gap-1.5 h-9 bg-[#0A66C2] hover:bg-[#004182] text-xs sm:w-auto sm:gap-2 sm:text-sm"
               onClick={handleSchedule}
               disabled={isSaving || isPublishing}
             >
@@ -430,7 +432,7 @@ export function SchedulingBar({
           ) : (
             <Button
               size="sm"
-              className="gap-1.5 sm:gap-2 h-9 bg-[#0A66C2] hover:bg-[#004182] hover:shadow-[0_0_20px_rgba(10,102,194,0.3)] transition-shadow text-xs sm:text-sm"
+              className="w-full gap-1.5 h-9 bg-[#0A66C2] hover:bg-[#004182] text-xs sm:w-auto sm:gap-2 sm:text-sm"
               onClick={handlePostNow}
               disabled={isSaving || isPublishing}
             >
@@ -439,7 +441,8 @@ export function SchedulingBar({
               ) : (
                 <Linkedin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               )}
-              <span>{isPublishing ? "Publishing..." : "Post to LinkedIn"}</span>
+              <span className="hidden sm:inline">{isPublishing ? "Publishing..." : "Post to LinkedIn"}</span>
+              <span className="sm:hidden">{isPublishing ? "Posting..." : "Post"}</span>
             </Button>
           )}
         </div>

@@ -25,7 +25,7 @@ export function TrendCard({ trend, onDraftPost, isGenerating }: TrendCardProps) 
   return (
     <Card
       className={cn(
-        "min-w-[200px] max-w-[200px] sm:min-w-[240px] sm:max-w-[240px] flex-shrink-0 transition-all hover:shadow-md hover:-translate-y-0.5",
+        "min-w-[200px] max-w-[200px] sm:min-w-[240px] sm:max-w-[240px] flex-shrink-0 transition-colors hover:border-foreground/20",
         isHot && "ring-1 ring-emerald-500/20",
       )}
     >
@@ -51,12 +51,7 @@ export function TrendCard({ trend, onDraftPost, isGenerating }: TrendCardProps) 
           {trend.reason}
         </p>
 
-        <Button
-          size="sm"
-          onClick={() => onDraftPost(trend)}
-          disabled={isGenerating}
-          className="w-full h-7 sm:h-8 text-[10px] sm:text-xs bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-        >
+        <Button variant="outline" size="sm" onClick={() => onDraftPost(trend)} disabled={isGenerating} className="w-full h-7 sm:h-8 text-[10px] sm:text-xs">
           {isGenerating ? (
             <>
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />

@@ -13,15 +13,8 @@ import { createBrowserClient } from "@/lib/supabase/client"
 import { useDrafts } from "@/hooks/use-drafts"
 import type { Tone } from "@/lib/types/draft"
 import type { Trend } from "@/lib/types/trends"
-import { FileText, PenLine, Sparkles } from "lucide-react"
-
-export interface EditorState {
-  content: string
-  tone: Tone
-  isGenerating: boolean
-  postImage: string | null
-  isGeneratingImage: boolean
-}
+import type { EditorState } from "@/lib/types/editor"
+import { FileText, PenLine } from "lucide-react"
 
 function ContentLabContent() {
   const router = useRouter()
@@ -184,24 +177,17 @@ function ContentLabContent() {
 
   return (
     <div className="relative flex min-h-screen overflow-x-hidden bg-background">
-      <Sidebar onNewPost={handleNewPost} onOpenDrafts={() => setIsDraftsPanelOpen(true)} />
+      <Sidebar />
 
-      <main className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-24 md:ml-64 md:pt-0">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-28 right-[-6rem] h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute top-36 left-[-7rem] h-96 w-96 rounded-full bg-amber-300/10 blur-3xl" />
-          <div className="absolute bottom-[-10rem] right-1/3 h-96 w-96 rounded-full bg-emerald-300/10 blur-3xl" />
-        </div>
-
+      <main className="relative min-w-0 flex-1 overflow-y-auto overflow-x-hidden pt-16 pb-32 md:ml-64 md:pt-0 md:pb-24">
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur sm:p-8">
-            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-primary/10 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:p-8">
             <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-xl">
-                <Badge variant="secondary" className="gap-2 bg-primary/10 text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  AI studio
+                <Badge variant="secondary" className="gap-2 bg-muted text-muted-foreground">
+                  <PenLine className="h-3.5 w-3.5" />
+                  Content studio
                 </Badge>
                 <h1 className="mt-4 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
                   Content Lab
@@ -216,7 +202,7 @@ function ContentLabContent() {
                   </Button>
                   <Button
                     variant="outline"
-                    className="gap-2 bg-background/70"
+                    className="gap-2 bg-transparent"
                     onClick={() => setIsDraftsPanelOpen(true)}
                   >
                     <FileText className="h-4 w-4" />
@@ -227,7 +213,7 @@ function ContentLabContent() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 {heroHighlights.map((item) => (
-                  <div key={item.label} className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                  <div key={item.label} className="rounded-xl border border-border/60 bg-card p-4">
                     <p className={`text-2xl font-semibold ${item.tone}`}>{item.value}</p>
                     <p className="mt-1 text-sm font-medium text-foreground">{item.label}</p>
                     <p className="text-xs text-muted-foreground">{item.helper}</p>
@@ -270,9 +256,6 @@ function ContentLabContent() {
         onScheduledDateChange={setScheduledDate}
         onScheduledTimeChange={setScheduledTime}
         onDraftIdChange={(id) => setCurrentDraftId(id)}
-        onPublished={() => {
-          handleNewPost()
-        }}
       />
 
       {/* Drafts Panel */}
@@ -280,6 +263,7 @@ function ContentLabContent() {
         isOpen={isDraftsPanelOpen}
         onClose={() => setIsDraftsPanelOpen(false)}
         onLoadDraft={handleLoadDraft}
+        currentDraftId={currentDraftId}
       />
     </div>
   )

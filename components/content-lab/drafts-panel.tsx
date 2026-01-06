@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -30,6 +30,15 @@ export function DraftsPanel({ isOpen, onClose, onLoadDraft, currentDraftId }: Dr
   const { drafts, isLoading, deleteDraft } = useDrafts()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.body.style.overflow = originalOverflow
+    }
+  }, [isOpen])
 
   const handleDelete = async () => {
     if (!deleteId) return
@@ -72,7 +81,7 @@ export function DraftsPanel({ isOpen, onClose, onLoadDraft, currentDraftId }: Dr
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm lg:bg-transparent lg:backdrop-blur-none"
+          className="fixed inset-0 z-40 bg-background/70 lg:bg-transparent"
           onClick={onClose}
         />
       )}
@@ -80,11 +89,11 @@ export function DraftsPanel({ isOpen, onClose, onLoadDraft, currentDraftId }: Dr
       {/* Panel */}
       <div
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-full max-w-md border-l border-border bg-background shadow-xl transition-transform duration-300 ease-in-out",
+          "fixed top-0 right-0 z-50 h-full w-full max-w-md border-l border-border/60 bg-background shadow-[0_16px_32px_rgba(15,23,42,0.12)] transition-transform duration-300 ease-in-out",
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full min-h-0 flex-col">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <div>
@@ -99,7 +108,7 @@ export function DraftsPanel({ isOpen, onClose, onLoadDraft, currentDraftId }: Dr
           </div>
 
           {/* Drafts List */}
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 min-h-0 overscroll-contain">
             <div className="p-4 space-y-3">
               {isLoading ? (
                 // Loading skeletons
@@ -127,8 +136,8 @@ export function DraftsPanel({ isOpen, onClose, onLoadDraft, currentDraftId }: Dr
                   <div
                     key={draft.id}
                     className={cn(
-                      "group relative rounded-lg border border-border p-4 transition-colors hover:border-primary/50 hover:bg-accent/50 cursor-pointer",
-                      currentDraftId === draft.id && "border-primary bg-accent/50",
+                      "group relative rounded-lg border border-border/60 p-4 transition-colors hover:border-foreground/20 hover:bg-muted/50 cursor-pointer",
+                      currentDraftId === draft.id && "border-foreground/30 bg-muted/50",
                     )}
                     onClick={() => onLoadDraft(draft)}
                   >

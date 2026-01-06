@@ -5,10 +5,8 @@ import {
   TrendingUp,
   Calendar,
   Send,
-  CheckCircle2,
   ArrowRight,
   Linkedin,
-  BarChart3,
   PenLine,
 } from "lucide-react"
 
@@ -61,63 +59,14 @@ const testimonials = [
   },
 ]
 
-const pricingPlans = [
-  {
-    name: "Starter",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for getting started",
-    features: ["5 AI-generated posts/month", "Basic trend discovery", "Draft saving", "LinkedIn preview"],
-    cta: "Get Started Free",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$29",
-    period: "/month",
-    description: "For serious content creators",
-    features: [
-      "Unlimited AI posts",
-      "Advanced trend analysis",
-      "Direct LinkedIn posting",
-      "Smart scheduling",
-      "AI image generation",
-      "Priority support",
-    ],
-    cta: "Start Free Trial",
-    highlighted: true,
-  },
-  {
-    name: "Team",
-    price: "$79",
-    period: "/month",
-    description: "For growing teams",
-    features: [
-      "Everything in Pro",
-      "5 team members",
-      "Collaborative drafts",
-      "Analytics dashboard",
-      "API access",
-      "Dedicated support",
-    ],
-    cta: "Contact Sales",
-    highlighted: false,
-  },
-]
-
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute -top-24 right-[-6rem] h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
-        <div className="absolute top-40 left-[-7rem] h-96 w-96 rounded-full bg-amber-300/20 blur-3xl" />
-        <div className="absolute bottom-[-12rem] right-1/3 h-96 w-96 rounded-full bg-emerald-300/15 blur-3xl" />
-      </div>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-md">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/60 bg-background">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-sky-400 text-sm font-bold text-primary-foreground shadow-sm">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               LA
             </div>
             <span className="text-lg font-semibold">LinkAgent</span>
@@ -125,9 +74,6 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 md:flex">
             <Link href="#features" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               Features
-            </Link>
-            <Link href="#pricing" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-              Pricing
             </Link>
             <Link href="#testimonials" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
               Testimonials
@@ -153,9 +99,9 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/80 px-4 py-1.5 text-xs font-medium text-muted-foreground shadow-sm">
-              <Sparkles className="h-4 w-4 text-primary" />
-              AI-Powered LinkedIn Growth
+              <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/60 px-4 py-1.5 text-xs font-medium text-muted-foreground">
+                <Sparkles className="h-4 w-4 text-primary" />
+                AI-Powered LinkedIn Growth
               </div>
               <h1 className="mt-6 text-4xl font-semibold tracking-tight sm:text-6xl lg:text-7xl">
                 Create standout LinkedIn posts <span className="text-primary">in minutes</span>
@@ -172,7 +118,7 @@ export default function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="#features">
-                  <Button size="lg" variant="outline" className="gap-2 bg-background/60 text-base">
+                  <Button size="lg" variant="outline" className="gap-2 bg-transparent text-base">
                     See How It Works
                   </Button>
                 </Link>
@@ -180,8 +126,7 @@ export default function LandingPage() {
             </div>
 
             <div className="relative">
-              <div className="absolute -right-6 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
-              <div className="rounded-3xl border border-border/70 bg-card/80 p-6 shadow-sm backdrop-blur">
+              <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                     <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -194,7 +139,7 @@ export default function LandingPage() {
                   </span>
                 </div>
                 <div className="mt-6 space-y-4">
-                  <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                  <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
                     <p className="text-sm font-medium text-foreground">
                       "Your next LinkedIn post is already half written. Here is the hook..."
                     </p>
@@ -203,7 +148,7 @@ export default function LandingPage() {
                       <span>2 mins ago</span>
                     </div>
                   </div>
-                  <div className="rounded-2xl border border-border/60 bg-background/70 p-4">
+                  <div className="rounded-2xl border border-border/60 bg-muted/40 p-4">
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>Scheduled</span>
                       <span>Thu, 9:00 AM</span>
@@ -215,7 +160,7 @@ export default function LandingPage() {
                 </div>
                 <div className="mt-6 grid grid-cols-3 gap-3">
                   {stats.map((stat) => (
-                    <div key={stat.label} className="rounded-2xl border border-border/60 bg-background/70 p-3">
+                    <div key={stat.label} className="rounded-2xl border border-border/60 bg-muted/40 p-3">
                       <div className="text-lg font-semibold text-foreground">{stat.value}</div>
                       <div className="text-xs text-muted-foreground">{stat.label}</div>
                     </div>
@@ -241,7 +186,7 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="group relative rounded-2xl border border-border/70 bg-card/80 p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/40"
+                className="group relative rounded-2xl border border-border/60 bg-card p-6 transition-colors hover:border-foreground/20"
               >
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
                   <feature.icon className="h-6 w-6" />
@@ -255,14 +200,14 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="border-y border-border/70 bg-card/60 py-20 sm:py-32">
+      <section className="border-y border-border/60 bg-muted/30 py-20 sm:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">From idea to viral post in 3 steps</h2>
           </div>
 
           <div className="mt-16 grid gap-8 lg:grid-cols-3">
-            <div className="relative rounded-2xl border border-border/70 bg-background/70 p-6 shadow-sm">
+            <div className="relative rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                 1
               </div>
@@ -271,7 +216,7 @@ export default function LandingPage() {
                 Browse AI-curated trending topics in your niche. Click any trend to start drafting.
               </p>
             </div>
-            <div className="relative rounded-2xl border border-border/70 bg-background/70 p-6 shadow-sm">
+            <div className="relative rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                 2
               </div>
@@ -280,7 +225,7 @@ export default function LandingPage() {
                 AI writes your first draft in seconds. Customize tone, add hooks, and generate images.
               </p>
             </div>
-            <div className="relative rounded-2xl border border-border/70 bg-background/70 p-6 shadow-sm">
+            <div className="relative rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                 3
               </div>
@@ -302,7 +247,7 @@ export default function LandingPage() {
 
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {testimonials.map((testimonial, i) => (
-              <div key={i} className="rounded-2xl border border-border/70 bg-card/80 p-6 shadow-sm">
+              <div key={i} className="rounded-2xl border border-border/60 bg-card p-6 shadow-[0_1px_2px_rgba(15,23,42,0.06)]">
                 <p className="text-muted-foreground">"{testimonial.quote}"</p>
                 <div className="mt-6 flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary">
@@ -319,63 +264,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="border-t border-border/70 bg-card/60 py-20 sm:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Simple, transparent pricing</h2>
-            <p className="mt-4 text-lg text-muted-foreground">Start free. Upgrade when you're ready.</p>
-          </div>
-
-          <div className="mt-16 grid gap-8 lg:grid-cols-3">
-            {pricingPlans.map((plan, i) => (
-              <div
-                key={i}
-                className={`relative rounded-2xl border p-8 shadow-sm ${
-                  plan.highlighted ? "border-primary bg-card" : "border-border/70 bg-card/80"
-                }`}
-              >
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
-                    Most Popular
-                  </div>
-                )}
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground">{plan.period}</span>
-                </div>
-                <p className="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-                <ul className="mt-6 space-y-3">
-                  {plan.features.map((feature, j) => (
-                    <li key={j} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/auth/sign-up" className="mt-8 block">
-                  <Button
-                    className={`w-full ${
-                      plan.highlighted
-                        ? "bg-primary hover:bg-primary/90"
-                        : "bg-foreground text-background hover:bg-foreground/90"
-                    }`}
-                  >
-                    {plan.cta}
-                  </Button>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 sm:py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative overflow-hidden rounded-3xl border border-border/70 bg-gradient-to-br from-primary to-sky-500 px-6 py-16 text-center shadow-sm sm:px-16 sm:py-24">
-            <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/20 blur-2xl" />
+          <div className="relative overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-br from-primary to-primary/90 px-6 py-16 text-center shadow-[0_1px_2px_rgba(15,23,42,0.12)] sm:px-16 sm:py-24">
             <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
               Ready to grow your LinkedIn presence?
             </h2>
@@ -395,7 +287,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/70 py-12">
+      <footer className="border-t border-border/60 py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
             <div className="flex items-center gap-2">

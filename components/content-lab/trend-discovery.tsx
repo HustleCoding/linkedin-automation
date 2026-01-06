@@ -62,14 +62,14 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
   }
 
   return (
-    <section className="rounded-3xl border border-border/70 bg-card/80 px-4 py-4 shadow-sm backdrop-blur sm:px-6 sm:py-6">
+    <section className="rounded-2xl border border-border/60 bg-card px-4 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)] sm:px-6 sm:py-6">
       {/* Header */}
       <div className="mb-3 flex flex-col gap-3 sm:mb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             <h2 className="text-sm font-semibold text-foreground sm:text-base">Trending Topics</h2>
-            <Badge variant="secondary" className="ml-1 bg-primary/10 text-[10px] text-primary sm:text-xs">
+            <Badge variant="secondary" className="ml-1 bg-muted text-[10px] text-muted-foreground sm:text-xs">
               <Flame className="mr-0.5 sm:mr-1 h-2.5 w-2.5 sm:h-3 sm:w-3 text-orange-500" />
               Live
             </Badge>
@@ -118,7 +118,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
           variant="outline"
           size="icon"
           className={cn(
-            "absolute left-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-background/80 shadow-md transition-opacity sm:left-2 sm:flex sm:h-8 sm:w-8",
+            "absolute left-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-card shadow-[0_1px_2px_rgba(15,23,42,0.12)] transition-opacity sm:left-2 sm:flex sm:h-8 sm:w-8",
             canScrollLeft ? "opacity-100" : "pointer-events-none opacity-0",
           )}
           onClick={() => scroll("left")}
@@ -180,7 +180,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
           variant="outline"
           size="icon"
           className={cn(
-            "absolute right-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-background/80 shadow-md transition-opacity sm:right-2 sm:flex sm:h-8 sm:w-8",
+            "absolute right-1 top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 rounded-full bg-card shadow-[0_1px_2px_rgba(15,23,42,0.12)] transition-opacity sm:right-2 sm:flex sm:h-8 sm:w-8",
             canScrollRight ? "opacity-100" : "pointer-events-none opacity-0",
           )}
           onClick={() => scroll("right")}

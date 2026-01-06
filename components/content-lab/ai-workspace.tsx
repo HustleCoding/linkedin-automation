@@ -2,7 +2,7 @@
 
 import { PostEditor } from "./post-editor"
 import { LinkedInPreview } from "./linkedin-preview"
-import type { EditorState } from "@/app/page"
+import type { EditorState } from "@/lib/types/editor"
 
 interface AIWorkspaceProps {
   editorState: EditorState
@@ -22,7 +22,7 @@ export function AIWorkspace({
   onImageGeneratingChange,
 }: AIWorkspaceProps) {
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-3xl border border-border/70 bg-card/80 p-4 shadow-sm backdrop-blur lg:flex-row lg:gap-6 lg:p-6">
+    <div className="flex min-w-0 flex-1 flex-col gap-4 overflow-hidden rounded-2xl border border-border/60 bg-card p-4 shadow-[0_1px_2px_rgba(15,23,42,0.06)] lg:flex-row lg:gap-6 lg:p-6">
       {/* Editor Panel */}
       <div className="w-full min-w-0 lg:flex-1">
         <PostEditor
