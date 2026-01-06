@@ -39,3 +39,52 @@
 
 - Store secrets in `.env.local` and keep them out of version control.
 - Supabase, LinkedIn, and other provider settings live in `lib/` and `app/api/`; review those files when wiring new integrations.
+
+## Product Overview
+
+LinkAgent is a LinkedIn content workspace that combines trend discovery, AI drafting, scheduling, and direct publishing.
+
+### Core Flows
+
+- **Auth + onboarding**: Supabase Auth, onboarding gate in `lib/supabase/proxy.ts`, and preferences in `user_preferences`.
+- **Trend discovery**: `/api/trends` generates niche trends and caches them per user.
+- **Content Lab**: Draft posts, generate hooks/images, and preview in a LinkedIn-style UI.
+- **Scheduling + publishing**: Drafts stored in Supabase; scheduled posts are published via Vercel cron.
+- **Research**: `/api/research` and `/api/competitor` generate and store research history.
+
+## Environment Variables (Required)
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `LINKEDIN_CLIENT_ID`
+- `LINKEDIN_CLIENT_SECRET`
+- `AI_GATEWAY_API_KEY`
+- `CRON_SECRET`
+
+## LinkedIn Integrations
+
+- **Login (Supabase)** uses LinkedIn OIDC (`provider: "linkedin_oidc"` in auth pages).
+- **Publishing OAuth** lives under `/api/linkedin/*` and requires `w_member_social` scope with redirect URL `/api/linkedin/callback`.
+
+## Scheduling Notes
+
+- Vercel cron calls `/api/cron/publish` every 5 minutes.
+- Requests must include `Authorization: Bearer ${CRON_SECRET}`.
+
+## AI Models (Defaults)
+
+- Post generation: `anthropic/claude-haiku-4.5` (`app/api/generate/route.ts`)
+- Image generation: `bfl/flux-pro-1.1` (`app/api/generate-image/route.ts`)
+- Trends + research: `perplexity/sonar-pro` (`app/api/trends/route.ts`, `app/api/research/route.ts`)
+
+## Supabase Migrations
+
+Run the SQL scripts in order:
+
+1. `scripts/001_create_drafts_table.sql`
+2. `scripts/002_add_linkedin_fields.sql`
+3. `scripts/003_create_user_preferences.sql`
+4. `scripts/004_create_linkedin_connections.sql`
+5. `scripts/005_create_trend_cache.sql`
+6. `scripts/006_create_research_history.sql`
