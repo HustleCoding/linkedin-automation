@@ -33,6 +33,7 @@ function ContentLabContent() {
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
   const [isDraftsPanelOpen, setIsDraftsPanelOpen] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const [activeDraftingTrendId, setActiveDraftingTrendId] = useState<string | null>(null)
 
   const draftCount = drafts?.filter((d) => d.status === "draft").length || 0
   const scheduledCount = drafts?.filter((d) => d.status === "scheduled").length || 0
@@ -112,6 +113,7 @@ function ContentLabContent() {
   const handleDraftFromTrend = async (trend: Trend) => {
     const tone = editorState.tone
 
+    setActiveDraftingTrendId(trend.id)
     setEditorState((prev) => ({ ...prev, isGenerating: true }))
 
     try {
@@ -133,12 +135,13 @@ function ContentLabContent() {
       setEditorState((prev) => ({
         ...prev,
         content: data.content || "",
-        isGenerating: false,
       }))
       setCurrentDraftId(null)
     } catch (error) {
       console.error("Failed to generate draft:", error)
+    } finally {
       setEditorState((prev) => ({ ...prev, isGenerating: false }))
+      setActiveDraftingTrendId(null)
     }
   }
 
@@ -225,7 +228,7 @@ function ContentLabContent() {
 
           {/* Trend Discovery */}
           <div className="mt-8">
-            <TrendDiscovery onDraftPost={handleDraftFromTrend} isGenerating={editorState.isGenerating} />
+            <TrendDiscovery onDraftPost={handleDraftFromTrend} activeDraftingTrendId={activeDraftingTrendId} />
           </div>
 
           {/* AI Workspace - Pass editorState and handler functions */}

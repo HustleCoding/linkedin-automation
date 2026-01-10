@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { createLinkedInOAuthState, getLinkedInStateSecret } from "@/lib/linkedin/oauth-state"
 
 const LINKEDIN_AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization"
 const SCOPES = ["openid", "profile", "email", "w_member_social"]
@@ -17,18 +18,24 @@ export async function GET(request: Request) {
   }
 
   const clientId = process.env.LINKEDIN_CLIENT_ID
-  if (!clientId) {
-    return NextResponse.json({ error: "LinkedIn client ID not configured" }, { status: 500 })
+  const stateSecret = (() => {
+    try {
+      return getLinkedInStateSecret()
+    } catch (error) {
+      console.error("LinkedIn state secret missing:", error)
+      return null
+    }
+  })()
+
+  if (!clientId || !stateSecret) {
+    return NextResponse.json({ error: "LinkedIn not configured" }, { status: 500 })
   }
 
-  // Get the origin from the request for redirect URL
-  const { searchParams } = new URL(request.url)
-  const origin = searchParams.get("origin") || new URL(request.url).origin
+  const origin = new URL(request.url).origin
 
   const redirectUri = `${origin}/api/linkedin/callback`
 
-  // Generate state with user ID to prevent CSRF and identify user in callback
-  const state = Buffer.from(JSON.stringify({ userId: user.id, timestamp: Date.now() })).toString("base64")
+  const state = createLinkedInOAuthState({ userId: user.id }, stateSecret)
 
   const authUrl = new URL(LINKEDIN_AUTH_URL)
   authUrl.searchParams.set("response_type", "code")

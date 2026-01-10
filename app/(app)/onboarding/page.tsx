@@ -79,12 +79,16 @@ export default function OnboardingPage() {
   // Listen for OAuth popup messages
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      if (!event.data || typeof event.data !== "object") return
+      if (!("type" in event.data)) return
+
       if (event.data.type === "LINKEDIN_AUTH_SUCCESS") {
         setLinkedInConnected(true)
         setLinkedInProfile(event.data.data)
         setIsConnecting(false)
       } else if (event.data.type === "LINKEDIN_AUTH_ERROR") {
-        console.error("LinkedIn auth error:", event.data.error)
+        console.error("LinkedIn auth error:", typeof event.data.error === "string" ? event.data.error : "")
         setIsConnecting(false)
       }
     }

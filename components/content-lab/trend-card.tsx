@@ -11,9 +11,10 @@ interface TrendCardProps {
   trend: Trend
   onDraftPost: (trend: Trend) => void
   isGenerating: boolean
+  disabled?: boolean
 }
 
-export function TrendCard({ trend, onDraftPost, isGenerating }: TrendCardProps) {
+export function TrendCard({ trend, onDraftPost, isGenerating, disabled }: TrendCardProps) {
   const getScoreColor = (score: number) => {
     if (score >= 90) return "text-emerald-600 bg-emerald-500/10 border-emerald-500/20"
     if (score >= 80) return "text-primary bg-primary/10 border-primary/20"
@@ -30,13 +31,13 @@ export function TrendCard({ trend, onDraftPost, isGenerating }: TrendCardProps) 
       )}
     >
       <CardContent className="p-3 sm:p-4">
-        <div className="mb-2 sm:mb-3 flex items-start justify-between gap-2">
-          <Badge variant="outline" className="text-[10px] sm:text-xs font-normal">
-            {trend.category}
+        <div className="mb-2 sm:mb-3 flex items-start gap-2">
+          <Badge variant="outline" className="min-w-0 flex-1 shrink justify-start text-[10px] sm:text-xs font-normal">
+            <span className="min-w-0 flex-1 truncate">{trend.category}</span>
           </Badge>
           <div
             className={cn(
-              "flex items-center gap-0.5 sm:gap-1 rounded-full border px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium",
+              "shrink-0 flex items-center gap-0.5 sm:gap-1 rounded-full border px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-medium",
               getScoreColor(trend.viralScore),
             )}
           >
@@ -51,7 +52,13 @@ export function TrendCard({ trend, onDraftPost, isGenerating }: TrendCardProps) 
           {trend.reason}
         </p>
 
-        <Button variant="outline" size="sm" onClick={() => onDraftPost(trend)} disabled={isGenerating} className="w-full h-7 sm:h-8 text-[10px] sm:text-xs">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onDraftPost(trend)}
+          disabled={disabled || isGenerating}
+          className="w-full h-7 sm:h-8 text-[10px] sm:text-xs"
+        >
           {isGenerating ? (
             <>
               <Loader2 className="h-3 w-3 mr-1 animate-spin" />

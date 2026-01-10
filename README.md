@@ -83,6 +83,7 @@ Create `.env.local` (or configure these in Vercel):
 | `SUPABASE_SERVICE_ROLE_KEY`             | Yes      | Service role key (for cron publishing)      |
 | `LINKEDIN_CLIENT_ID`                    | Yes      | LinkedIn app client ID (publishing OAuth)   |
 | `LINKEDIN_CLIENT_SECRET`                | Yes      | LinkedIn app client secret                  |
+| `LINKEDIN_STATE_SECRET`                 | No       | HMAC secret for OAuth state (recommended)   |
 | `AI_GATEWAY_API_KEY`                    | Yes      | Vercel AI Gateway key                       |
 | `CRON_SECRET`                           | Yes      | Bearer token for cron publishing            |
 | `NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL` | No       | Dev OAuth redirect override                 |

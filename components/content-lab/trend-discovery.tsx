@@ -14,10 +14,10 @@ import { cn } from "@/lib/utils"
 
 interface TrendDiscoveryProps {
   onDraftPost: (trend: Trend) => void
-  isGenerating: boolean
+  activeDraftingTrendId: string | null
 }
 
-export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProps) {
+export function TrendDiscovery({ onDraftPost, activeDraftingTrendId }: TrendDiscoveryProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedNiche, setSelectedNiche] = useState<Niche>("All Niches")
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -26,6 +26,7 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
 
   const { trends, isLoading, isRefreshing, isError, refresh } = useTrends(selectedNiche)
   const isBusy = isLoading || isRefreshing
+  const isDrafting = Boolean(activeDraftingTrendId)
 
   const filteredTrends = trends.filter((trend) => {
     const matchesSearch =
@@ -163,7 +164,13 @@ export function TrendDiscovery({ onDraftPost, isGenerating }: TrendDiscoveryProp
           {!isLoading &&
             !isError &&
             filteredTrends.map((trend) => (
-              <TrendCard key={trend.id} trend={trend} onDraftPost={onDraftPost} isGenerating={isGenerating} />
+              <TrendCard
+                key={trend.id}
+                trend={trend}
+                onDraftPost={onDraftPost}
+                isGenerating={activeDraftingTrendId === trend.id}
+                disabled={isDrafting}
+              />
             ))}
         </div>
 

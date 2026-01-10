@@ -86,23 +86,28 @@ function SettingsContent() {
   // Listen for OAuth popup messages
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return
+      if (!event.data || typeof event.data !== "object") return
+      if (!("type" in event.data)) return
+
       if (event.data.type === "LINKEDIN_AUTH_SUCCESS") {
         setLinkedInStatus({
           connected: true,
-          name: event.data.data?.name || null,
-          picture: event.data.data?.picture || null,
+          name: typeof event.data.data?.name === "string" ? event.data.data.name : null,
+          picture: typeof event.data.data?.picture === "string" ? event.data.data.picture : null,
           loading: false,
         })
         setIsConnecting(false)
         toast({
           title: "LinkedIn Connected!",
-          description: `Connected as ${event.data.data?.name || "your account"}`,
+          description: `Connected as ${typeof event.data.data?.name === "string" ? event.data.data.name : "your account"}`,
         })
       } else if (event.data.type === "LINKEDIN_AUTH_ERROR") {
         setIsConnecting(false)
         toast({
           title: "Connection failed",
-          description: event.data.error || "Unable to connect LinkedIn. Please try again.",
+          description:
+            typeof event.data.error === "string" ? event.data.error : "Unable to connect LinkedIn. Please try again.",
           variant: "destructive",
         })
       }
