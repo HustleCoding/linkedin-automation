@@ -1,4 +1,4 @@
-import { createGateway, gateway, generateText, output } from "ai"
+import { createGateway, gateway, generateObject, generateText } from "ai"
 import { z } from "zod"
 import { createServerClient } from "@/lib/supabase/server"
 import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
@@ -65,6 +65,87 @@ const outlineSchema = z.object({
   examples: z.array(z.string()).min(1).max(3),
   cta: z.string(),
   hashtags: z.array(z.string()).min(2).max(4),
+})
+
+type Outline = z.infer<typeof outlineSchema>
+
+const sanitizeJsonText = (rawText: string) => {
+  const withoutTags = rawText.replace(/<\/?parameter[^>]*>/gi, "")
+  const withoutFences = withoutTags.replace(/```(?:json)?/gi, "")
+  const start = withoutFences.indexOf("{")
+  const end = withoutFences.lastIndexOf("}")
+  if (start === -1 || end === -1 || end <= start) {
+    return withoutFences.trim()
+  }
+  return withoutFences.slice(start, end + 1)
+}
+
+const coerceStringArray = (value: unknown) => {
+  if (Array.isArray(value)) {
+    const filtered = value.filter((item) => typeof item === "string" && item.trim()).map((item) => item.trim())
+    return filtered.length > 0 ? filtered : null
+  }
+  if (typeof value === "string") {
+    const match = value.match(/\[[\s\S]*\]/)
+    if (match) {
+      try {
+        const parsed = JSON.parse(match[0])
+        if (Array.isArray(parsed)) {
+          const filtered = parsed.filter((item) => typeof item === "string" && item.trim()).map((item) => item.trim())
+          return filtered.length > 0 ? filtered : null
+        }
+      } catch {
+        // Fall back to line parsing below.
+      }
+    }
+    const items = value
+      .split("\n")
+      .map((line) => line.replace(/^[-•✓\s]+/, "").trim())
+      .filter(Boolean)
+    return items.length > 0 ? items : null
+  }
+  return null
+}
+
+const normalizeOutline = (value: unknown): Outline | null => {
+  if (!value || typeof value !== "object") {
+    return null
+  }
+  const record = value as Record<string, unknown>
+  const outline: Outline = {
+    hook: typeof record.hook === "string" ? record.hook.trim() : "",
+    valuePoints: coerceStringArray(record.valuePoints) || [],
+    proofPoints: coerceStringArray(record.proofPoints) || [],
+    examples: coerceStringArray(record.examples) || [],
+    cta: typeof record.cta === "string" ? record.cta.trim() : "",
+    hashtags: coerceStringArray(record.hashtags) || [],
+  }
+
+  const result = outlineSchema.safeParse(outline)
+  return result.success ? result.data : null
+}
+
+const parseOutlineFromText = (rawText: string) => {
+  const cleaned = sanitizeJsonText(rawText)
+  try {
+    const parsed = JSON.parse(cleaned)
+    return normalizeOutline(parsed)
+  } catch {
+    return null
+  }
+}
+
+const buildOutlineFallback = (trend: { tag: string; title: string; reason: string }): Outline => ({
+  hook: `A practical ${trend.title} checklist I wish I had earlier.`,
+  valuePoints: [
+    `What changed about ${trend.title} this week, and why it matters now.`,
+    "The common mistake that keeps results flat.",
+    "A simple adjustment you can apply today without extra tools.",
+  ],
+  proofPoints: [`Observed across LinkedIn: ${trend.reason}`],
+  examples: [`Example: apply the checklist to your next post and compare results.`],
+  cta: "What are you testing this week?",
+  hashtags: [trend.tag, "#LinkedIn", "#ContentStrategy"],
 })
 
 export async function POST(request: Request) {
@@ -149,17 +230,26 @@ Requirements:
 - Keep phrases short and scannable
 - Return only a JSON object that matches the schema exactly`
 
-    const { output: outline } = await generateText({
-      model: provider("anthropic/claude-haiku-4.5"),
-      prompt: outlinePrompt,
-      temperature: 0.4,
-      maxTokens: 600,
-      output: output.object({
-        schema: outlineSchema,
-        name: "post_outline",
-        description: "Structured outline with hook, value points, proof, examples, CTA, hashtags.",
-      }),
-    })
+    let outline = await (async () => {
+      try {
+        const { object } = await generateObject({
+          model: provider("anthropic/claude-haiku-4.5"),
+          schema: outlineSchema,
+          prompt: outlinePrompt,
+          temperature: 0.5,
+          maxOutputTokens: 600,
+          maxRetries: 1,
+          experimental_repairText: async ({ text }) => {
+            const repaired = parseOutlineFromText(text)
+            return repaired ? JSON.stringify(repaired) : null
+          },
+        })
+        return object
+      } catch (error) {
+        console.error("Outline generation failed, using fallback:", error)
+        return buildOutlineFallback(trend)
+      }
+    })()
 
     const draftPrompt = `Write the final LinkedIn post using the outline below.
 
