@@ -1,9 +1,15 @@
-import { generateText } from "ai"
+import { createGateway, gateway, generateObject, generateText } from "ai"
 import { z } from "zod"
+import { createServerClient } from "@/lib/supabase/server"
+import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
+
+const postTypes = ["how-to", "teardown", "checklist", "case-study", "contrarian", "story"] as const
+type PostType = (typeof postTypes)[number]
 
 const requestSchema = z.object({
   type: z.enum(["hook", "draft"]),
   tone: z.enum(["professional", "conversational", "inspirational", "educational"]),
+  postType: z.enum(postTypes).optional(),
   currentContent: z.string().optional(),
   trend: z
     .object({
@@ -25,114 +31,163 @@ const toneDescriptions: Record<string, string> = {
   educational: "teaches through storytelling, breaks down complex ideas simply, uses frameworks and numbered lists",
 }
 
-const JUSTIN_WELSH_STYLE_GUIDE = `
-You are writing LinkedIn posts in the style of Justin Welsh, a top LinkedIn creator with millions of followers.
+const postTypeGuides: Record<PostType, { label: string; guidance: string }> = {
+  "how-to": {
+    label: "How-to",
+    guidance: "Teach a repeatable process with clear steps and outcomes.",
+  },
+  teardown: {
+    label: "Teardown",
+    guidance: "Break down why something works, highlight the mechanics and tradeoffs.",
+  },
+  checklist: {
+    label: "Checklist",
+    guidance: "Provide a practical checklist with concrete, scannable items.",
+  },
+  "case-study": {
+    label: "Case study",
+    guidance: "Share context, actions taken, and measurable results.",
+  },
+  contrarian: {
+    label: "Contrarian",
+    guidance: "Challenge a common belief with evidence and a better alternative.",
+  },
+  story: {
+    label: "Story",
+    guidance: "Tell a narrative arc that lands on a clear, actionable lesson.",
+  },
+}
 
-CRITICAL STYLE RULES:
-1. **SHORT LINES**: Each line should be 1 sentence MAX. Often just a fragment. Never write paragraphs.
-2. **EMPHASIZE STATS**: Make numbers or statistics stand out using wording and line breaks (e.g., "40x more opportunities", "270% growth", "82% of buyers"). No markdown formatting.
-3. **WHITE SPACE**: Use lots of line breaks. Every sentence gets its own line. Add blank lines between sections.
-4. **HOOKS**: Start with a controversial statement, surprising stat, or pattern interrupt. The first line decides if people read on.
-5. **NO FLUFF**: Every word must earn its place. Cut ruthlessly. If it doesn't add value, delete it.
-6. **CONTRARIAN TAKES**: Challenge common beliefs. Say what others are afraid to say.
-7. **PERSONAL**: Use "I" statements. Share real experiences. Be vulnerable.
-8. **SCANNABLE**: Use bullets (•) and numbered lists to make posts easy to skim. No markdown or asterisks.
-9. **CTA AT END**: End with a question or call-to-action that invites engagement.
-10. **HASHTAGS**: Only 2-3 hashtags, placed at the very end after a line break.
-
-STRUCTURE:
-- Hook (1-2 punchy lines)
-- Line break
-- Main content (short lines, data points, insights)
-- Line break  
-- Takeaway or lesson
-- Line break
-- CTA question
-- Line break
-- Hashtags
-
-EXAMPLE FORMAT:
-"""
-Most people think [common belief].
-
-They're wrong.
-
-Here's what actually works:
-
-• Point 1 with a standout stat
-• Point 2 with specific example
-• Point 3 with actionable insight
-
-The truth?
-
-[Contrarian insight in 1 line]
-
-What's your take on this?
-
-#Hashtag1 #Hashtag2
-"""
-`
+const outlineSchema = z.object({
+  hook: z.string(),
+  valuePoints: z.array(z.string()).min(3).max(6),
+  proofPoints: z.array(z.string()).min(1).max(3),
+  examples: z.array(z.string()).min(1).max(3),
+  cta: z.string(),
+  hashtags: z.array(z.string()).min(2).max(4),
+})
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     const body = await request.json()
-    const { type, tone, currentContent, trend } = requestSchema.parse(body)
+    const { type, tone, postType: postTypeInput, currentContent, trend } = requestSchema.parse(body)
+
+    const userApiKey = user ? await getUserAiGatewayKey(supabase, user.id) : null
+    const provider = userApiKey ? createGateway({ apiKey: userApiKey }) : gateway
 
     const toneDescription = toneDescriptions[tone]
+    const postType: PostType = postTypeInput || "how-to"
+    const postTypeGuide = postTypeGuides[postType]
 
-    let prompt: string
+    const sourceNotes = trend
+      ? [
+          `Trend tag: ${trend.tag}`,
+          `Title: ${trend.title}`,
+          `Why trending: ${trend.reason}`,
+          `Category: ${trend.category}`,
+        ].join("\n")
+      : currentContent
+        ? `Current content:\n${currentContent}`
+        : "No additional source notes provided."
+
+    const rubric = [
+      "Specificity > generic advice",
+      "Actionable steps or checklist items",
+      "Concrete examples",
+      "Clear structure: hook -> value -> proof -> CTA",
+    ].join("\n- ")
 
     if (type === "hook") {
-      prompt = `${JUSTIN_WELSH_STYLE_GUIDE}
+      const hookPrompt = `Write a 1-2 line hook for a LinkedIn post.
 
-Generate ONLY a hook (opening 1-2 lines) for a LinkedIn post.
-
+Post type: ${postTypeGuide.label} (${postTypeGuide.guidance})
 Tone: ${tone} - ${toneDescription}
 
-${currentContent ? `The post content is about:\n${currentContent}\n\nCreate a hook that fits this content.` : "Create a standalone attention-grabbing hook."}
+Source notes:
+${sourceNotes}
 
-Requirements:
-- Maximum 2 short lines
-- Must stop the scroll instantly
-- Use a pattern interrupt, contrarian take, or surprising stat
-- Match the ${tone} tone
-- No markdown formatting or asterisks (**)
-- NO hashtags
-- NO explanation - output ONLY the hook text`
-    } else {
-      if (!trend) {
-        return Response.json({ error: "Trend data required for draft generation" }, { status: 400 })
-      }
+Rules:
+- 1-2 short lines, no hashtags
+- Promise concrete value, avoid vague advice
+- No markdown or special formatting
+- Output ONLY the hook text`
 
-      prompt = `${JUSTIN_WELSH_STYLE_GUIDE}
+      const { text } = await generateText({
+        model: provider("anthropic/claude-haiku-4.5"),
+        prompt: hookPrompt,
+        temperature: 0.75,
+        maxTokens: 120,
+      })
 
-Generate a complete LinkedIn post about this trending topic:
-
-Topic: ${trend.tag}
-Title: ${trend.title}
-Why trending: ${trend.reason}
-Category: ${trend.category}
-
-Tone: ${tone} - ${toneDescription}
-
-Requirements:
-- Follow the Justin Welsh format EXACTLY
-- Start with a scroll-stopping hook
-- Use SHORT lines (1 sentence max each)
-- Add bullet points (•) where appropriate
-- 150-200 words total
-- End with engaging question
-- Include ${trend.tag} naturally
-- Add 2-3 relevant hashtags at the end
-- No markdown formatting or asterisks (**)
-- NO explanation - output ONLY the post text`
+      const cleanedText = text.replace(/\*\*/g, "").trim()
+      return Response.json({ content: cleanedText })
     }
 
+    if (!trend) {
+      return Response.json({ error: "Trend data required for draft generation" }, { status: 400 })
+    }
+
+    const outlinePrompt = `Create a structured outline for a LinkedIn post.
+
+Post type: ${postTypeGuide.label} (${postTypeGuide.guidance})
+Tone: ${tone} - ${toneDescription}
+
+Rubric:
+- ${rubric}
+
+Source notes:
+${sourceNotes}
+
+Requirements:
+- Make value points specific and actionable
+- Include at least one concrete example
+- Provide 2-4 relevant hashtags (include ${trend.tag})
+- Keep phrases short and scannable`
+
+    const { object: outline } = await generateObject({
+      model: provider("anthropic/claude-haiku-4.5"),
+      schema: outlineSchema,
+      prompt: outlinePrompt,
+      temperature: 0.5,
+      maxOutputTokens: 600,
+    })
+
+    const draftPrompt = `Write the final LinkedIn post using the outline below.
+
+Post type: ${postTypeGuide.label} (${postTypeGuide.guidance})
+Tone: ${tone} - ${toneDescription}
+
+Rubric:
+- ${rubric}
+
+Outline:
+Hook: ${outline.hook}
+Value points:
+${outline.valuePoints.map((point) => `- ${point}`).join("\n")}
+Proof points:
+${outline.proofPoints.map((point) => `- ${point}`).join("\n")}
+Examples:
+${outline.examples.map((example) => `- ${example}`).join("\n")}
+CTA: ${outline.cta}
+Hashtags: ${outline.hashtags.join(" ")}
+
+Rules:
+- 140-220 words
+- Use line breaks to separate sections
+- Use bullets or numbers when it improves clarity (no markdown)
+- End with the CTA, then hashtags on the final line
+- After drafting, self-critique against the rubric and fix any gaps
+- Output ONLY the final post text`
+
     const { text } = await generateText({
-      model: "anthropic/claude-haiku-4.5",
-      prompt,
-      temperature: 0.85,
-      maxTokens: 600,
+      model: provider("anthropic/claude-haiku-4.5"),
+      prompt: draftPrompt,
+      temperature: 0.8,
+      maxTokens: 900,
     })
 
     const cleanedText = text.replace(/\*\*/g, "").trim()

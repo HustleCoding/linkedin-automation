@@ -161,7 +161,6 @@ export function Sidebar() {
                   </Avatar>
                   <div className="flex-1 truncate">
                     <p className="text-sm font-medium text-sidebar-foreground truncate">{displayLabel}</p>
-                    <p className="text-xs text-muted-foreground truncate">Free Plan</p>
                   </div>
                   <ChevronUp className="h-4 w-4 text-muted-foreground" />
                 </button>

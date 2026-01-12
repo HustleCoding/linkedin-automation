@@ -13,7 +13,7 @@ import { createBrowserClient } from "@/lib/supabase/client"
 import { useDrafts } from "@/hooks/use-drafts"
 import type { Tone } from "@/lib/types/draft"
 import type { Trend } from "@/lib/types/trends"
-import type { EditorState } from "@/lib/types/editor"
+import type { EditorState, PostType } from "@/lib/types/editor"
 import { FileText, PenLine } from "lucide-react"
 
 function ContentLabContent() {
@@ -24,6 +24,7 @@ function ContentLabContent() {
   const [editorState, setEditorState] = useState<EditorState>({
     content: "",
     tone: "professional",
+    postType: "how-to",
     isGenerating: false,
     postImage: null,
     isGeneratingImage: false,
@@ -100,6 +101,7 @@ function ContentLabContent() {
     setEditorState({
       content: "",
       tone: "professional",
+      postType: "how-to",
       isGenerating: false,
       postImage: null,
       isGeneratingImage: false,
@@ -123,6 +125,7 @@ function ContentLabContent() {
         body: JSON.stringify({
           type: "draft",
           tone,
+          postType: editorState.postType,
           trend,
         }),
       })
@@ -237,6 +240,7 @@ function ContentLabContent() {
               editorState={editorState}
               onContentChange={(content) => setEditorState((prev) => ({ ...prev, content }))}
               onToneChange={(tone) => setEditorState((prev) => ({ ...prev, tone: tone as Tone }))}
+              onPostTypeChange={(postType) => setEditorState((prev) => ({ ...prev, postType: postType as PostType }))}
               onGeneratingChange={(isGenerating) => setEditorState((prev) => ({ ...prev, isGenerating }))}
               onImageChange={(postImage) => setEditorState((prev) => ({ ...prev, postImage }))}
               onImageGeneratingChange={(isGeneratingImage) => setEditorState((prev) => ({

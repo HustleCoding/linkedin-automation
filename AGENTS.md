@@ -60,6 +60,7 @@ LinkAgent is a LinkedIn content workspace that combines trend discovery, AI draf
 - `LINKEDIN_CLIENT_ID`
 - `LINKEDIN_CLIENT_SECRET`
 - `AI_GATEWAY_API_KEY`
+- `AI_GATEWAY_KEY_ENCRYPTION_SECRET`
 - `CRON_SECRET`
 
 ## LinkedIn Integrations
@@ -70,6 +71,7 @@ LinkAgent is a LinkedIn content workspace that combines trend discovery, AI draf
 ## Scheduling Notes
 
 - Vercel cron calls `/api/cron/publish` every 5 minutes.
+- Vercel cron calls `/api/cron/analytics` every hour.
 - Requests must include `Authorization: Bearer ${CRON_SECRET}`.
 
 ## AI Models (Defaults)
@@ -88,3 +90,5 @@ Run the SQL scripts in order:
 4. `scripts/004_create_linkedin_connections.sql`
 5. `scripts/005_create_trend_cache.sql`
 6. `scripts/006_create_research_history.sql`
+7. `scripts/007_add_draft_analytics.sql`
+8. `scripts/008_add_ai_gateway_key.sql`

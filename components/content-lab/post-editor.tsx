@@ -5,19 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { PenLine, Lightbulb, Italic, List, Link2, ImagePlus, X, Palette, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import type { PostType } from "@/lib/types/editor"
 
 interface PostEditorProps {
   content: string
   tone: string
+  postType: PostType
   isGenerating: boolean
   postImage: string | null
   isGeneratingImage: boolean
   onContentChange: (content: string) => void
   onToneChange: (tone: string) => void
+  onPostTypeChange: (postType: PostType) => void
   onGenerate: (generating: boolean) => void
   onImageChange: (image: string | null) => void
   onImageGeneratingChange: (generating: boolean) => void
@@ -37,22 +40,34 @@ const imageStyles = [
   { value: "bold", label: "Bold", description: "Vibrant & impactful" },
 ]
 
+const postTypes = [
+  { value: "how-to", label: "How-to", description: "Step-by-step guidance" },
+  { value: "teardown", label: "Teardown", description: "Break down what works" },
+  { value: "checklist", label: "Checklist", description: "Actionable checklist" },
+  { value: "case-study", label: "Case Study", description: "Results and proof" },
+  { value: "contrarian", label: "Contrarian", description: "Challenge assumptions" },
+  { value: "story", label: "Story", description: "Narrative with a lesson" },
+]
+
 const MAX_CHARS = 3000
 
 export function PostEditor({
   content,
   tone,
+  postType,
   isGenerating,
   postImage,
   isGeneratingImage,
   onContentChange,
   onToneChange,
+  onPostTypeChange,
   onGenerate,
   onImageChange,
   onImageGeneratingChange,
 }: PostEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [imageStyle, setImageStyle] = useState("professional")
+  const selectedPostType = postTypes.find((type) => type.value === postType) ?? postTypes[0]
 
   const charCount = content.length
   const charPercentage = (charCount / MAX_CHARS) * 100
@@ -66,6 +81,7 @@ export function PostEditor({
         body: JSON.stringify({
           type: "hook",
           tone,
+          postType,
           currentContent: content,
         }),
       })
@@ -141,29 +157,42 @@ export function PostEditor({
   return (
     <Card className="h-full overflow-hidden">
       <CardHeader className="pb-3">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <CardTitle className="flex items-center gap-2 text-lg">
             <PenLine className="h-5 w-5 text-primary" />
             Post Editor
           </CardTitle>
-          <div className="overflow-hidden">
-            <ToggleGroup
-              type="single"
-              value={tone}
-              onValueChange={(value) => value && onToneChange(value)}
-              className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-fit sm:flex-wrap sm:gap-1"
-            >
-              {tones.map((t) => (
-                <ToggleGroupItem
-                  key={t.value}
-                  value={t.value}
-                  size="sm"
-                  className="w-full justify-center text-xs text-center whitespace-normal rounded-md first:rounded-md last:rounded-md data-[state=on]:bg-primary data-[state=on]:text-primary-foreground sm:w-auto sm:whitespace-nowrap sm:rounded-none sm:first:rounded-l-md sm:last:rounded-r-md sm:px-3"
-                >
-                  {t.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+          <div className="grid gap-3 sm:grid-cols-2 lg:w-auto lg:items-center">
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Tone</p>
+              <Select value={tone} onValueChange={(value) => value && onToneChange(value)}>
+                <SelectTrigger className="h-9 w-full border-border/70 bg-background sm:w-44">
+                  <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tones.map((t) => (
+                    <SelectItem key={t.value} value={t.value} textValue={t.label}>
+                      <span className="font-medium">{t.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <p className="text-xs font-medium text-muted-foreground">Post type</p>
+              <Select value={postType} onValueChange={(value) => onPostTypeChange(value as PostType)}>
+                <SelectTrigger className="h-9 w-full border-border/70 bg-background sm:w-44">
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {postTypes.map((type) => (
+                    <SelectItem key={type.value} value={type.value} textValue={type.label}>
+                      <span className="font-medium">{type.label}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
       </CardHeader>

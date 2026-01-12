@@ -8,6 +8,7 @@ interface AIWorkspaceProps {
   editorState: EditorState
   onContentChange: (content: string) => void
   onToneChange: (tone: string) => void
+  onPostTypeChange: (postType: EditorState["postType"]) => void
   onGeneratingChange: (generating: boolean) => void
   onImageChange: (image: string | null) => void
   onImageGeneratingChange: (generating: boolean) => void
@@ -17,6 +18,7 @@ export function AIWorkspace({
   editorState,
   onContentChange,
   onToneChange,
+  onPostTypeChange,
   onGeneratingChange,
   onImageChange,
   onImageGeneratingChange,
@@ -28,11 +30,13 @@ export function AIWorkspace({
         <PostEditor
           content={editorState.content}
           tone={editorState.tone}
+          postType={editorState.postType}
           isGenerating={editorState.isGenerating}
           postImage={editorState.postImage}
           isGeneratingImage={editorState.isGeneratingImage}
           onContentChange={onContentChange}
           onToneChange={onToneChange}
+          onPostTypeChange={onPostTypeChange}
           onGenerate={onGeneratingChange}
           onImageChange={onImageChange}
           onImageGeneratingChange={onImageGeneratingChange}

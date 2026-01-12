@@ -15,6 +15,16 @@ export interface Draft {
   linkedin_post_id: string | null
   published_at: string | null
   linkedin_error: string | null
+  analytics_impressions?: number | null
+  analytics_clicks?: number | null
+  analytics_likes?: number | null
+  analytics_comments?: number | null
+  analytics_shares?: number | null
+  analytics_engagement?: number | null
+  analytics_engagement_rate?: number | null
+  last_analytics_synced_at?: string | null
+  analytics_error?: string | null
+  analytics_backoff_until?: string | null
 }
 
 export interface CreateDraftInput {

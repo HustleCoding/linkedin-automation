@@ -1,5 +1,7 @@
-import { experimental_generateImage } from "ai"
+import { createGateway, gateway, experimental_generateImage } from "ai"
 import { z } from "zod"
+import { createServerClient } from "@/lib/supabase/server"
+import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
 
 const requestSchema = z.object({
   content: z.string().min(1),
@@ -8,8 +10,15 @@ const requestSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
     const body = await request.json()
     const { content, style } = requestSchema.parse(body)
+
+    const userApiKey = user ? await getUserAiGatewayKey(supabase, user.id) : null
+    const provider = userApiKey ? createGateway({ apiKey: userApiKey }) : gateway
 
     const styleGuide = {
       professional: "Clean corporate imagery, subtle gradients, business context, modern office aesthetic",
@@ -19,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const result = await experimental_generateImage({
-      model: "bfl/flux-pro-1.1",
+      model: provider.imageModel("bfl/flux-pro-1.1"),
       prompt: `Professional LinkedIn post image. Style: ${styleGuide[style]}. Context: ${content.slice(0, 500)}. Requirements: No text or words, no faces, clean modern aesthetic, suitable for business networking, square format.`,
       aspectRatio: "1:1",
     })

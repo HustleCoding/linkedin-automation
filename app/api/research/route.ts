@@ -1,7 +1,8 @@
-import { generateObject } from "ai"
+import { createGateway, gateway, generateObject } from "ai"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
 
 const researchSchema = z.object({
   overview: z.string().describe("A comprehensive overview of the topic (2-3 paragraphs)"),
@@ -53,13 +54,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Topic is required" }, { status: 400 })
     }
 
+    const userApiKey = user ? await getUserAiGatewayKey(supabase, user.id) : null
+    const provider = userApiKey ? createGateway({ apiKey: userApiKey }) : gateway
+
     const depthContext =
       depth === "deep"
         ? "Provide an extremely comprehensive analysis with detailed insights, multiple perspectives, and extensive content angles."
         : "Provide a solid overview with actionable insights and practical content angles."
 
     const { object } = await generateObject({
-      model: "perplexity/sonar-pro",
+      model: provider("perplexity/sonar-pro"),
       schema: researchSchema,
       prompt: `You are a LinkedIn content strategist and researcher with access to real-time data. Research the following topic for LinkedIn content creation:
 

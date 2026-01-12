@@ -20,39 +20,17 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useDrafts } from "@/hooks/use-drafts"
+import { useToast } from "@/hooks/use-toast"
 import { formatDistanceToNow } from "date-fns"
 
-interface PostAnalytics {
-  impressions?: number
-  clicks?: number
-  likes?: number
-  comments?: number
-  shares?: number
-  engagement?: number
-  engagementRate?: number
-}
-
-interface PublishedPost {
-  id: string
-  content: string
-  tone: string
-  image_url: string | null
-  published_at: string
-  linkedin_post_id: string
-  analytics: PostAnalytics | null
-}
-
-interface SocialAnalytics {
-  followers?: number
-  following?: number
-  posts?: number
-  engagement?: number
-  impressions?: number
-}
+const formatMetric = (value?: number | null) => (typeof value === "number" ? value.toLocaleString() : "-")
 
 function AnalyticsContent() {
-  const { drafts } = useDrafts()
+  const { drafts, refresh } = useDrafts()
   const [isLoading, setIsLoading] = useState(true)
+  const [isRefreshingList, setIsRefreshingList] = useState(false)
+  const [refreshingPostId, setRefreshingPostId] = useState<string | null>(null)
+  const { toast } = useToast()
 
   const publishedPosts = drafts.filter((d) => d.status === "published")
   const publishedCount = publishedPosts.length
@@ -118,6 +96,38 @@ function AnalyticsContent() {
     return () => clearTimeout(timer)
   }, [])
 
+  const handleRefreshList = async () => {
+    setIsRefreshingList(true)
+    await refresh()
+    setIsRefreshingList(false)
+  }
+
+  const handleRefreshPost = async (draftId: string) => {
+    setRefreshingPostId(draftId)
+    try {
+      const res = await fetch("/api/analytics/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftId }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data?.error || "Failed to refresh analytics")
+      }
+
+      await refresh()
+    } catch (error) {
+      toast({
+        title: "Analytics refresh failed",
+        description: error instanceof Error ? error.message : "Please try again in a moment.",
+      })
+    } finally {
+      setRefreshingPostId(null)
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen bg-background">
       <Sidebar />
@@ -138,13 +148,12 @@ function AnalyticsContent() {
                 </p>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    // Placeholder for fetch functions if needed in future
-                  }}
+                  onClick={handleRefreshList}
                   className="mt-5 gap-2 bg-transparent"
+                  disabled={isRefreshingList}
                 >
-                  <RefreshCw className="h-4 w-4" />
-                  Refresh
+                  {isRefreshingList ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                  Refresh list
                 </Button>
               </div>
 
@@ -233,23 +242,55 @@ function AnalyticsContent() {
                         </div>
                       </div>
 
-                      {/* Placeholder Analytics */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground sm:gap-6">
-                        <div className="flex items-center gap-1.5" title="Upgrade to see impressions">
-                          <Eye className="h-4 w-4" />
-                          <span>-</span>
+                      {/* Analytics */}
+                      <div className="flex flex-col gap-2 text-sm text-muted-foreground sm:items-end">
+                        <div className="flex items-center gap-4 sm:gap-6">
+                          <div className="flex items-center gap-1.5" title="Impressions">
+                            <Eye className="h-4 w-4" />
+                            <span>{formatMetric(post.analytics_impressions)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5" title="Likes">
+                            <Heart className="h-4 w-4" />
+                            <span>{formatMetric(post.analytics_likes)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5" title="Comments">
+                            <MessageCircle className="h-4 w-4" />
+                            <span>{formatMetric(post.analytics_comments)}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5" title="Shares">
+                            <Share2 className="h-4 w-4" />
+                            <span>{formatMetric(post.analytics_shares)}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1.5" title="Upgrade to see likes">
-                          <Heart className="h-4 w-4" />
-                          <span>-</span>
-                        </div>
-                        <div className="flex items-center gap-1.5" title="Upgrade to see comments">
-                          <MessageCircle className="h-4 w-4" />
-                          <span>-</span>
-                        </div>
-                        <div className="flex items-center gap-1.5" title="Upgrade to see shares">
-                          <Share2 className="h-4 w-4" />
-                          <span>-</span>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          {post.last_analytics_synced_at ? (
+                            <span>
+                              Updated{" "}
+                              {formatDistanceToNow(new Date(post.last_analytics_synced_at), { addSuffix: true })}
+                            </span>
+                          ) : (
+                            <span>Not synced yet</span>
+                          )}
+                          {post.analytics_error && (
+                            <span className="flex items-center gap-1 text-destructive" title={post.analytics_error}>
+                              <AlertCircle className="h-3.5 w-3.5" />
+                              <span className="max-w-[220px] truncate">{post.analytics_error}</span>
+                            </span>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-7 gap-2 px-2"
+                            onClick={() => handleRefreshPost(post.id)}
+                            disabled={refreshingPostId === post.id}
+                          >
+                            {refreshingPostId === post.id ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-3.5 w-3.5" />
+                            )}
+                            Refresh
+                          </Button>
                         </div>
                       </div>
                     </div>

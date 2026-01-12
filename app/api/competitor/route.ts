@@ -1,7 +1,8 @@
-import { generateObject } from "ai"
+import { createGateway, gateway, generateObject } from "ai"
 import { z } from "zod"
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
 
 const competitorSchema = z.object({
   profile: z.object({
@@ -52,8 +53,11 @@ export async function POST(req: Request) {
 
     const identifier = profileUrl || name
 
+    const userApiKey = user ? await getUserAiGatewayKey(supabase, user.id) : null
+    const provider = userApiKey ? createGateway({ apiKey: userApiKey }) : gateway
+
     const { object } = await generateObject({
-      model: "perplexity/sonar-pro",
+      model: provider("perplexity/sonar-pro"),
       schema: competitorSchema,
       prompt: `You are a LinkedIn content strategist. Analyze this LinkedIn thought leader/competitor:
 

@@ -28,6 +28,11 @@ function SettingsContent() {
     loading: true,
   })
   const [isConnecting, setIsConnecting] = useState(false)
+  const [aiGatewayKey, setAiGatewayKey] = useState("")
+  const [aiGatewayKeyLast4, setAiGatewayKeyLast4] = useState<string | null>(null)
+  const [hasAiGatewayKey, setHasAiGatewayKey] = useState(false)
+  const [isSavingAiGatewayKey, setIsSavingAiGatewayKey] = useState(false)
+  const [isRemovingAiGatewayKey, setIsRemovingAiGatewayKey] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -43,8 +48,16 @@ function SettingsContent() {
         const response = await fetch("/api/user/preferences")
         if (response.ok) {
           const data = await response.json()
-          if (data?.preferences?.display_name) {
-            setDisplayName(data.preferences.display_name)
+          const preferences = data?.preferences
+          if (preferences?.display_name) {
+            setDisplayName(preferences.display_name)
+          }
+          if (preferences?.ai_gateway_key_last4) {
+            setAiGatewayKeyLast4(preferences.ai_gateway_key_last4)
+            setHasAiGatewayKey(true)
+          } else {
+            setAiGatewayKeyLast4(null)
+            setHasAiGatewayKey(false)
           }
         }
       } catch (error) {
@@ -166,6 +179,79 @@ function SettingsContent() {
     }
   }
 
+  const handleSaveAiGatewayKey = async () => {
+    const trimmedKey = aiGatewayKey.trim()
+    if (!trimmedKey) {
+      toast({
+        title: "API key required",
+        description: "Please enter your AI Gateway API key.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsSavingAiGatewayKey(true)
+    try {
+      const response = await fetch("/api/user/ai-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: trimmedKey }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Failed to save API key")
+      }
+
+      setAiGatewayKey("")
+      setAiGatewayKeyLast4(data?.last4 || trimmedKey.slice(-4))
+      setHasAiGatewayKey(true)
+      toast({
+        title: "API key saved",
+        description: "Your AI Gateway key is now active.",
+      })
+    } catch (error) {
+      console.error("Failed to save AI key:", error)
+      toast({
+        title: "Save failed",
+        description: error instanceof Error ? error.message : "Unable to save the key. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSavingAiGatewayKey(false)
+    }
+  }
+
+  const handleRemoveAiGatewayKey = async () => {
+    setIsRemovingAiGatewayKey(true)
+    try {
+      const response = await fetch("/api/user/ai-key", { method: "DELETE" })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data?.error || "Failed to remove API key")
+      }
+
+      setAiGatewayKey("")
+      setAiGatewayKeyLast4(null)
+      setHasAiGatewayKey(false)
+      toast({
+        title: "API key removed",
+        description: "Your account will use the shared default key.",
+      })
+    } catch (error) {
+      console.error("Failed to remove AI key:", error)
+      toast({
+        title: "Remove failed",
+        description: error instanceof Error ? error.message : "Unable to remove the key. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsRemovingAiGatewayKey(false)
+    }
+  }
+
   const handleConnectLinkedIn = async () => {
     setIsConnecting(true)
     try {
@@ -248,7 +334,6 @@ function SettingsContent() {
                     <p className="font-medium text-foreground">
                       {displayName || linkedInStatus.name || userEmail || "Loading..."}
                     </p>
-                    <p className="text-sm text-muted-foreground">Free Plan</p>
                   </div>
                 </div>
 
@@ -273,6 +358,55 @@ function SettingsContent() {
                 <Button onClick={handleSaveProfile} disabled={!displayName.trim()}>
                   Save Changes
                 </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary" className="uppercase tracking-wide">
+                    AI
+                  </Badge>
+                  <CardTitle>AI Gateway</CardTitle>
+                </div>
+                <CardDescription>Bring your own AI Gateway key to use your own quota.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="ai-gateway-key">AI Gateway API Key</Label>
+                  <Input
+                    id="ai-gateway-key"
+                    type="password"
+                    placeholder={
+                      hasAiGatewayKey && aiGatewayKeyLast4 ? `************${aiGatewayKeyLast4}` : "Enter key"
+                    }
+                    value={aiGatewayKey}
+                    onChange={(event) => setAiGatewayKey(event.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Optional. Stored securely and only used for AI requests.
+                  </p>
+                  {hasAiGatewayKey && aiGatewayKeyLast4 && (
+                    <p className="text-xs text-muted-foreground">Saved key ending in {aiGatewayKeyLast4}</p>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    onClick={handleSaveAiGatewayKey}
+                    disabled={!aiGatewayKey.trim() || isSavingAiGatewayKey}
+                  >
+                    {isSavingAiGatewayKey ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save key"}
+                  </Button>
+                  {hasAiGatewayKey && (
+                    <Button
+                      variant="outline"
+                      onClick={handleRemoveAiGatewayKey}
+                      disabled={isRemovingAiGatewayKey}
+                    >
+                      {isRemovingAiGatewayKey ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove key"}
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

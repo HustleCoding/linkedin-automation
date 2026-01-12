@@ -12,13 +12,24 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { data, error } = await supabase.from("user_preferences").select("*").eq("user_id", user.id).single()
+    const { data, error } = await supabase
+      .from("user_preferences")
+      .select("display_name, niche, onboarding_completed, linkedin_connected, ai_gateway_key_last4")
+      .eq("user_id", user.id)
+      .single()
 
     if (error && error.code !== "PGRST116") {
       throw error
     }
 
-    return NextResponse.json({ preferences: data })
+    const preferences = data
+      ? {
+          ...data,
+          has_ai_gateway_key: Boolean(data.ai_gateway_key_last4),
+        }
+      : null
+
+    return NextResponse.json({ preferences })
   } catch (error) {
     console.error("Get preferences error:", error)
     return NextResponse.json({ error: "Failed to fetch preferences" }, { status: 500 })
@@ -55,12 +66,17 @@ export async function POST(request: Request) {
           onConflict: "user_id",
         },
       )
-      .select()
+      .select("display_name, niche, onboarding_completed, linkedin_connected, ai_gateway_key_last4")
       .single()
 
     if (error) throw error
 
-    return NextResponse.json({ preferences: data })
+    return NextResponse.json({
+      preferences: {
+        ...data,
+        has_ai_gateway_key: Boolean(data?.ai_gateway_key_last4),
+      },
+    })
   } catch (error) {
     console.error("Save preferences error:", error)
     return NextResponse.json({ error: "Failed to save preferences" }, { status: 500 })

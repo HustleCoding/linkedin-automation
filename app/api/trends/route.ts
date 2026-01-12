@@ -1,8 +1,9 @@
-import { generateObject } from "ai"
+import { createGateway, gateway, generateObject } from "ai"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createServerClient } from "@/lib/supabase/server"
 import type { Trend } from "@/lib/types/trends"
+import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
 
 const trendsSchema = z.object({
   trends: z
@@ -49,13 +50,16 @@ export async function POST(req: Request) {
       }
     }
 
+    const userApiKey = user ? await getUserAiGatewayKey(supabase, user.id) : null
+    const provider = userApiKey ? createGateway({ apiKey: userApiKey }) : gateway
+
     const nicheContext =
       requestedNiche && requestedNiche !== "All Niches"
         ? `Focus specifically on the "${requestedNiche}" niche.`
         : "Cover a variety of professional niches including Technology, Leadership, Career, Entrepreneurship, Sales, and Marketing."
 
     const { object } = await generateObject({
-      model: "perplexity/sonar-pro",
+      model: provider("perplexity/sonar-pro"),
       schema: trendsSchema,
       prompt: `You are a LinkedIn content strategist with access to real-time data. Search for and identify the top 6-8 currently trending topics on LinkedIn that would make great post content.
 
