@@ -1,5 +1,9 @@
 const LINKEDIN_POSTS_API = "https://api.linkedin.com/v2/posts"
 const LINKEDIN_IMAGES_API = "https://api.linkedin.com/v2/images"
+const MAX_LINKEDIN_POST_LENGTH = 3000
+
+const normalizeLinkedInContent = (content: string) =>
+  content.replace(/\r\n/g, "\n").replace(/[\u2028\u2029]/g, "\n").replace(/\u0000/g, "").trim()
 
 const parseJsonSafely = async (response: Response) => {
   const text = await response.text()
@@ -33,6 +37,18 @@ export async function publishToLinkedIn({
   content,
   imageUrl,
 }: PublishInput): Promise<PublishResult> {
+  const normalizedContent = normalizeLinkedInContent(content)
+  if (!normalizedContent) {
+    return { postId: null, postUrl: null, error: "Content is required." }
+  }
+  if (normalizedContent.length > MAX_LINKEDIN_POST_LENGTH) {
+    return {
+      postId: null,
+      postUrl: null,
+      error: `LinkedIn posts are limited to ${MAX_LINKEDIN_POST_LENGTH} characters.`,
+    }
+  }
+
   const authorUrn = `urn:li:person:${linkedinUserId}`
   let imageUrn: string | null = null
 
@@ -82,7 +98,7 @@ export async function publishToLinkedIn({
 
   const postPayload: Record<string, unknown> = {
     author: authorUrn,
-    commentary: content,
+    commentary: normalizedContent,
     visibility: "PUBLIC",
     distribution: {
       feedDistribution: "MAIN_FEED",

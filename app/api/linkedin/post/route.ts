@@ -52,8 +52,20 @@ export async function POST(request: Request) {
 
   const { draftId, content, imageUrl } = await request.json()
 
-  if (!content?.trim()) {
+  const normalizedContent =
+    typeof content === "string"
+      ? content.replace(/\r\n/g, "\n").replace(/[\u2028\u2029]/g, "\n").replace(/\u0000/g, "").trim()
+      : ""
+  const MAX_LINKEDIN_POST_LENGTH = 3000
+
+  if (!normalizedContent) {
     return NextResponse.json({ error: "Content is required" }, { status: 400 })
+  }
+  if (normalizedContent.length > MAX_LINKEDIN_POST_LENGTH) {
+    return NextResponse.json(
+      { error: `LinkedIn posts are limited to ${MAX_LINKEDIN_POST_LENGTH} characters.` },
+      { status: 400 },
+    )
   }
 
   try {
@@ -113,7 +125,7 @@ export async function POST(request: Request) {
     // Build the post payload
     const postPayload: Record<string, unknown> = {
       author: authorUrn,
-      commentary: content,
+      commentary: normalizedContent,
       visibility: "PUBLIC",
       distribution: {
         feedDistribution: "MAIN_FEED",
