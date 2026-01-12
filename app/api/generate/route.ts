@@ -1,4 +1,4 @@
-import { createGateway, gateway, generateObject, generateText } from "ai"
+import { createGateway, gateway, generateText, output } from "ai"
 import { z } from "zod"
 import { createServerClient } from "@/lib/supabase/server"
 import { getUserAiGatewayKey } from "@/lib/ai-gateway/user-key"
@@ -146,14 +146,19 @@ Requirements:
 - Make value points specific and actionable
 - Include at least one concrete example
 - Provide 2-4 relevant hashtags (include ${trend.tag})
-- Keep phrases short and scannable`
+- Keep phrases short and scannable
+- Return only a JSON object that matches the schema exactly`
 
-    const { object: outline } = await generateObject({
+    const { output: outline } = await generateText({
       model: provider("anthropic/claude-haiku-4.5"),
-      schema: outlineSchema,
       prompt: outlinePrompt,
-      temperature: 0.5,
-      maxOutputTokens: 600,
+      temperature: 0.4,
+      maxTokens: 600,
+      output: output.object({
+        schema: outlineSchema,
+        name: "post_outline",
+        description: "Structured outline with hook, value points, proof, examples, CTA, hashtags.",
+      }),
     })
 
     const draftPrompt = `Write the final LinkedIn post using the outline below.
