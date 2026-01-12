@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server"
+import { normalizeLinkedInContent } from "@/lib/linkedin/normalize-content"
 import { NextResponse } from "next/server"
 
 const LINKEDIN_POSTS_API = "https://api.linkedin.com/v2/posts"
@@ -52,10 +53,7 @@ export async function POST(request: Request) {
 
   const { draftId, content, imageUrl } = await request.json()
 
-  const normalizedContent =
-    typeof content === "string"
-      ? content.replace(/\r\n/g, "\n").replace(/[\u2028\u2029]/g, "\n").replace(/\u0000/g, "").trim()
-      : ""
+  const normalizedContent = typeof content === "string" ? normalizeLinkedInContent(content) : ""
   const MAX_LINKEDIN_POST_LENGTH = 3000
 
   if (!normalizedContent) {

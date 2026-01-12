@@ -1,9 +1,8 @@
+import { normalizeLinkedInContent } from "@/lib/linkedin/normalize-content"
+
 const LINKEDIN_POSTS_API = "https://api.linkedin.com/v2/posts"
 const LINKEDIN_IMAGES_API = "https://api.linkedin.com/v2/images"
 const MAX_LINKEDIN_POST_LENGTH = 3000
-
-const normalizeLinkedInContent = (content: string) =>
-  content.replace(/\r\n/g, "\n").replace(/[\u2028\u2029]/g, "\n").replace(/\u0000/g, "").trim()
 
 const parseJsonSafely = async (response: Response) => {
   const text = await response.text()
